@@ -1,6 +1,9 @@
 use crate::memory::types::AddressingMode;
 
-pub const ADC_WITH_IMMEDIATE: u8 = 0x69;
+pub const ADC_IMMEDIATE: u8 = 0x69;
+pub const ADC_ZERO_PAGE: u8 = 0x65;
+pub const ADC_ZERO_PAGE_X: u8 = 0x75;
+pub const ADC_ABSOLUTE: u8 = 0x6D;
 
 /// Opcodes for instruction set for 6402 processor
 /// see: [6502 docs](http://www.6502.org/tutorials/6502opcodes.html)
@@ -31,10 +34,10 @@ pub enum Opcode {
 impl Opcode {
     pub fn from_u8(value: u8) -> Option<Self> {
         match value {
-            ADC_WITH_IMMEDIATE => Some(Opcode::Adc(value, AddressingMode::Immediate)),
-            0x65 => Some(Opcode::Adc(value, AddressingMode::ZeroPage)),
-            0x75 => Some(Opcode::Adc(value, AddressingMode::ZeroPageX)),
-            0x6D => Some(Opcode::Adc(value, AddressingMode::Absolute)),
+            ADC_IMMEDIATE => Some(Opcode::Adc(value, AddressingMode::Immediate)),
+            ADC_ZERO_PAGE => Some(Opcode::Adc(value, AddressingMode::ZeroPage)),
+            ADC_ZERO_PAGE_X => Some(Opcode::Adc(value, AddressingMode::ZeroPageX)),
+            ADC_ABSOLUTE => Some(Opcode::Adc(value, AddressingMode::Absolute)),
             0x7D => Some(Opcode::Adc(value, AddressingMode::AbsoluteX)),
             0x79 => Some(Opcode::Adc(value, AddressingMode::AbsoluteY)),
             0x61 => Some(Opcode::Adc(value, AddressingMode::IndirectX)),
