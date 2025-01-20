@@ -1,7 +1,7 @@
 use super::*;
 
 #[test]
-fn read_write() {
+fn write() {
     // Given
     let address: u16 = 0x8000;
     let expected_data: u8 = 0x69;
@@ -29,4 +29,20 @@ fn read_u16() {
 
     // Then
     assert_eq!(expected_data, memory.read_u16(address));
+}
+
+#[test]
+fn write_array() {
+    // Given
+    let address: u16 = 0x8000;
+    let array: [u8; 5] = [0x69, 0x96, 0x12, 0x80, 0x0f];
+
+    // When
+    let mut memory = Memory::new();
+    memory.write_array(&array, address);
+
+    // Then
+    for i in 0..array.len() {
+        assert_eq!(array[i], memory.read(address + i as u16));
+    }
 }
