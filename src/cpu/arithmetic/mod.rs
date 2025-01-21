@@ -3,16 +3,13 @@ use super::Cpu;
 
 pub trait Arithmetic {
     fn adc(&mut self, data: u8);
+    fn sbc(&mut self, data: u8);
 }
 
 impl Arithmetic for Cpu {
     /// Implementation of ADC (Add with Carry) instruction
     fn adc(&mut self, data: u8) {
-        let carry: u8 = if self.registers.status.contains(CpuFlags::CARRY) {
-            1
-        } else {
-            0
-        };
+        let carry: u8 = if self.registers.status.contains(CpuFlags::CARRY) {1} else {0};
 
         let (result, carry_1) = self.registers.accumulator.overflowing_add(data);
         let (result, carry_2) = result.overflowing_add(carry);
@@ -36,6 +33,21 @@ impl Arithmetic for Cpu {
         );
 
         self.registers.accumulator = result;
+    }
+
+    /// Implementation of SBC (Subtract with Carry) instruction
+    /// According to the docs, there is no way to subtract without the carry which works as an inverse borrow
+    /// i.e, to subtract you SET THE CARRY before the operation. If the carry is cleared by the operation, it indicates a borrow occurred.
+    /// So, SBC operation is the same as ADC but with the data inverted.
+    /// According to the docs, the operation must do: A-M-(1-C)
+    /// This is the same as  A+(-M-1+C) => A+(-M-1)+C
+    /// So, we need to also remove the carry from the result, because it is an inverse borrow
+    /// See [SBC docs](https://www.nesdev.org/obelisk-6502-guide/reference.html#SBC)
+    fn sbc(&mut self, data: u8) {
+        // SBC is the same as ADC but with the data inverted,
+        // A-M-(1-C) => A+(-M-1+C) => A+(-M-1)+C
+        let negative_data = data.wrapping_neg().wrapping_sub(1);
+        self.adc(negative_data);
     }
 }
 
