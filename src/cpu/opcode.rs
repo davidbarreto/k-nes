@@ -9,6 +9,24 @@ pub const ADC_ABSOLUTE_Y: u8 = 0x79;
 pub const ADC_INDIRECT_X: u8 = 0x61;
 pub const ADC_INDIRECT_Y: u8 = 0x71;
 
+pub const SBC_IMMEDIATE: u8 = 0xE9;
+pub const SBC_ZERO_PAGE: u8 = 0xE5;
+pub const SBC_ZERO_PAGE_X: u8 = 0xF5;
+pub const SBC_ABSOLUTE: u8 = 0xED;
+pub const SBC_ABSOLUTE_X: u8 = 0xFD;
+pub const SBC_ABSOLUTE_Y: u8 = 0xF9;
+pub const SBC_INDIRECT_X: u8 = 0xE1;
+pub const SBC_INDIRECT_Y: u8 = 0xF1;
+
+pub const CMP_IMMEDIATE: u8 = 0xC9;
+pub const CMP_ZERO_PAGE: u8 = 0xC5;
+pub const CMP_ZERO_PAGE_X: u8 = 0xD5;
+pub const CMP_ABSOLUTE: u8 = 0xCD;
+pub const CMP_ABSOLUTE_X: u8 = 0xDD;
+pub const CMP_ABSOLUTE_Y: u8 = 0xD9;
+pub const CMP_INDIRECT_X: u8 = 0xC1;
+pub const CMP_INDIRECT_Y: u8 = 0xD1;
+
 pub const AND_IMMEDIATE: u8 = 0x29;
 pub const AND_ZERO_PAGE: u8 = 0x25;
 pub const AND_ZERO_PAGE_X: u8 = 0x35;
@@ -37,7 +55,7 @@ pub const EOR_INDIRECT_X: u8 = 0x41;
 pub const EOR_INDIRECT_Y: u8 = 0x51;
 
 pub const BIT_ZERO_PAGE: u8 = 0x24;
-pub const BIT_ABSOLUTE: u8 = 0x2c;
+pub const BIT_ABSOLUTE: u8 = 0x2C;
 
 pub const BPL: u8 = 0x10;
 pub const BMI: u8 = 0x30;
@@ -54,6 +72,10 @@ pub const BEQ: u8 = 0xF0;
 pub enum Opcode {
     /// Add with Carry
     Adc(u8, AddressingMode),
+    /// Subtract with Carry
+    Sbc(u8, AddressingMode),
+    /// Compare
+    Cmp(u8, AddressingMode),
     /// Bitwise And with accumulator
     And(u8, AddressingMode),
     /// Bitwise Or with accumulator
@@ -91,6 +113,22 @@ impl Opcode {
             ADC_ABSOLUTE_Y => Some(Opcode::Adc(value, AddressingMode::AbsoluteY)),
             ADC_INDIRECT_X => Some(Opcode::Adc(value, AddressingMode::IndirectX)),
             ADC_INDIRECT_Y => Some(Opcode::Adc(value, AddressingMode::IndirectY)),
+            SBC_IMMEDIATE => Some(Opcode::Sbc(value, AddressingMode::Immediate)),
+            SBC_ZERO_PAGE => Some(Opcode::Sbc(value, AddressingMode::ZeroPage)),
+            SBC_ZERO_PAGE_X => Some(Opcode::Sbc(value, AddressingMode::ZeroPageX)),
+            SBC_ABSOLUTE => Some(Opcode::Sbc(value, AddressingMode::Absolute)),
+            SBC_ABSOLUTE_X => Some(Opcode::Sbc(value, AddressingMode::AbsoluteX)),
+            SBC_ABSOLUTE_Y => Some(Opcode::Sbc(value, AddressingMode::AbsoluteY)),
+            SBC_INDIRECT_X => Some(Opcode::Sbc(value, AddressingMode::IndirectX)),
+            SBC_INDIRECT_Y => Some(Opcode::Sbc(value, AddressingMode::IndirectY)),
+            CMP_IMMEDIATE => Some(Opcode::Cmp(value, AddressingMode::Immediate)),
+            CMP_ZERO_PAGE => Some(Opcode::Cmp(value, AddressingMode::ZeroPage)),
+            CMP_ZERO_PAGE_X => Some(Opcode::Cmp(value, AddressingMode::ZeroPageX)),
+            CMP_ABSOLUTE => Some(Opcode::Cmp(value, AddressingMode::Absolute)),
+            CMP_ABSOLUTE_X => Some(Opcode::Cmp(value, AddressingMode::AbsoluteX)),
+            CMP_ABSOLUTE_Y => Some(Opcode::Cmp(value, AddressingMode::AbsoluteY)),
+            CMP_INDIRECT_X => Some(Opcode::Cmp(value, AddressingMode::IndirectX)),
+            CMP_INDIRECT_Y => Some(Opcode::Cmp(value, AddressingMode::IndirectY)),
             AND_IMMEDIATE => Some(Opcode::And(value, AddressingMode::Immediate)),
             AND_ZERO_PAGE => Some(Opcode::And(value, AddressingMode::ZeroPage)),
             AND_ZERO_PAGE_X => Some(Opcode::And(value, AddressingMode::ZeroPageX)),

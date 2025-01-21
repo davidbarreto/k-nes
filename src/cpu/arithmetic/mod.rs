@@ -4,6 +4,9 @@ use super::Cpu;
 pub trait Arithmetic {
     fn adc(&mut self, data: u8);
     fn sbc(&mut self, data: u8);
+    fn cmp(&mut self, data: u8);
+    fn cpx(&mut self, data: u8);
+    fn cpy(&mut self, data: u8);
 }
 
 impl Arithmetic for Cpu {
@@ -49,6 +52,27 @@ impl Arithmetic for Cpu {
         let negative_data = data.wrapping_neg().wrapping_sub(1);
         self.adc(negative_data);
     }
+
+    /// Implementation of CMP (Compare with Accumulator) instruction
+    fn cmp(&mut self, data: u8) {
+        compare(self, self.registers.accumulator, data);
+    }
+
+    /// Implementation of CPX (Compare with X Register) instruction
+    fn cpx(&mut self, data: u8) {
+        compare(self, self.registers.x_register, data);
+    }
+
+    /// Implementation of CPY (Compare with Y Register) instruction
+    fn cpy(&mut self, data: u8) {
+        compare(self, self.registers.y_register, data);
+    }
+}
+
+fn compare(cpu: &mut Cpu, register: u8, data: u8) {
+    cpu.registers.status.update_flag(CpuFlags::CARRY, register >= data);
+    cpu.registers.status.update_flag(CpuFlags::ZERO, register == data);
+    cpu.registers.status.update_flag(CpuFlags::NEGATIVE, register & 0x80 == 0x80);  
 }
 
 #[cfg(test)]

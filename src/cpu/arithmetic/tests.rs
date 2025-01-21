@@ -112,6 +112,39 @@ fn test_sbc_with_carry_clean_flag_carry_set_flag_negative() {
         Cpu::sbc);
 }
 
+#[test]
+fn test_cmp_flag_carry() {
+    run_arithmetic_test(
+        0x02,
+        0x01,
+        CpuFlags::empty(),
+        0x02,
+        CpuFlags::CARRY,
+        Cpu::cmp);
+}
+
+#[test]
+fn test_cmp_flag_carry_and_zero() {
+    run_arithmetic_test(
+        0x02,
+        0x02,
+        CpuFlags::empty(),
+        0x02,
+        CpuFlags::ZERO | CpuFlags::CARRY,
+        Cpu::cmp);
+}
+
+#[test]
+fn test_cmp_flag_carry_and_negative() {
+    run_arithmetic_test(
+        0xff,
+        0x00,
+        CpuFlags::empty(),
+        0xff,
+        CpuFlags::NEGATIVE | CpuFlags::CARRY,
+        Cpu::cmp);
+}
+
 fn run_arithmetic_test<F>(operand_1: u8, operand_2: u8, initial_status: CpuFlags, expected_result: u8, expected_status: CpuFlags, operation: F)
 where F: Fn(&mut Cpu, u8)
 {
