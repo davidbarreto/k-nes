@@ -60,7 +60,7 @@ impl Logical for Cpu {
     /// Implementation of BIT (Bit Test) instruction
     /// Tests bits in memory with the accumulator
     fn bit(&mut self, data: u8) {
-        let result = self.registers.accumulator & daata;
+        let result = self.registers.accumulator & data;
 
         // Update Zero flag
         self.registers
