@@ -273,3 +273,5 @@ fn execute_adc_indirect_y_with_high_y_value() {
     assert_eq!(Ok(()), cpu.execute_instruction(opcode::ADC_INDIRECT_Y));
     assert_eq!(cpu.registers.accumulator, expected_result);
 }
+
+// TODO Add tests for other addressing modes

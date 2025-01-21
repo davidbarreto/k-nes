@@ -2,6 +2,7 @@ pub mod opcode;
 pub mod types;
 
 mod arithmetic;
+mod logical;
 mod register_bank;
 
 use crate::memory::Memory;
