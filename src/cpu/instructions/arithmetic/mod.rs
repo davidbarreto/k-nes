@@ -1,5 +1,5 @@
-use super::types::CpuFlags;
-use super::Cpu;
+use crate::cpu::types::CpuFlags;
+use crate::cpu::Cpu;
 
 pub trait Arithmetic {
     fn adc(&mut self, data: u8);
