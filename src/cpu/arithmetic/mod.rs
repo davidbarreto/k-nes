@@ -26,6 +26,10 @@ impl Arithmetic for Cpu {
         self.registers
             .status
             .update_flag(CpuFlags::NEGATIVE, result & 0x80 == 0x80);
+
+        // For overflow, we need to check if the sign bit of the accumulator and the sign bit of the data
+        // are different from the sign bit of the result
+        // For detailed explanation, see https://www.righto.com/2012/12/the-6502-overflow-flag-explained.html
         self.registers.status.update_flag(
             CpuFlags::OVERFLOW,
             (self.registers.accumulator ^ result) & (data ^ result) & 0x80 != 0,
