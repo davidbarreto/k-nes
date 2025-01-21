@@ -1,13 +1,13 @@
 pub mod opcode;
 pub mod types;
 
-mod instructions;
+mod instruction_set;
 mod register_bank;
 
 use crate::memory::Memory;
 use crate::memory::types::AddressingMode;
 
-use instructions::arithmetic::Arithmetic;
+use instruction_set::arithmetic::Arithmetic;
 use register_bank::RegisterBank;
 use opcode::Opcode;
 use types::InstructionError;
