@@ -108,6 +108,18 @@ const TXA: u8 = 0x8A;
 const TYA: u8 = 0x98;
 const TSX: u8 = 0xBA;
 const TXS: u8 = 0x9A;
+const INC_ZERO_PAGE: u8 = 0xE6;
+const INC_ZERO_PAGE_X: u8 = 0xF6;
+const INC_ABSOLUTE: u8 = 0xEE;
+const INC_ABSOLUTE_X: u8 = 0xFE;
+const INX: u8 = 0xE8;
+const INY: u8 = 0xC8;
+const DEC_ZERO_PAGE: u8 = 0xC6;
+const DEC_ZERO_PAGE_X: u8 = 0xD6;
+const DEC_ABSOLUTE: u8 = 0xCE;
+const DEC_ABSOLUTE_X: u8 = 0xDE;
+const DEX: u8 = 0xCA;
+const DEY: u8 = 0x88;
 
 /// Opcodes of instruction set for 6502 processor
 /// see: [6502 docs](http://www.6502.org/tutorials/6502opcodes.html)
@@ -185,6 +197,18 @@ pub enum Opcode {
     Tsx(u8),
     /// Transfer X to Stack Pointer
     Txs(u8),
+    /// Increment Memory
+    Inc(u8, AddressingMode),
+    /// Increment X Register
+    Inx(u8),
+    /// Increment Y Register
+    Iny(u8),
+    /// Decrement Memory
+    Dec(u8, AddressingMode),
+    /// Decrement X Register
+    Dex(u8),
+    /// Decrement Y Register
+    Dey(u8),
 }
 
 impl Opcode {
@@ -298,6 +322,18 @@ impl Opcode {
             TYA => Some(Opcode::Tya(value)),
             TSX => Some(Opcode::Tsx(value)),
             TXS => Some(Opcode::Txs(value)),
+            INC_ZERO_PAGE => Some(Opcode::Inc(value, AddressingMode::ZeroPage)),
+            INC_ZERO_PAGE_X => Some(Opcode::Inc(value, AddressingMode::ZeroPageX)),
+            INC_ABSOLUTE => Some(Opcode::Inc(value, AddressingMode::Absolute)),
+            INC_ABSOLUTE_X => Some(Opcode::Inc(value, AddressingMode::AbsoluteX)),
+            INX => Some(Opcode::Inx(value)),
+            INY => Some(Opcode::Iny(value)),
+            DEC_ZERO_PAGE => Some(Opcode::Dec(value, AddressingMode::ZeroPage)),
+            DEC_ZERO_PAGE_X => Some(Opcode::Dec(value, AddressingMode::ZeroPageX)),
+            DEC_ABSOLUTE => Some(Opcode::Dec(value, AddressingMode::Absolute)),
+            DEC_ABSOLUTE_X => Some(Opcode::Dec(value, AddressingMode::AbsoluteX)),
+            DEX => Some(Opcode::Dex(value)),
+            DEY => Some(Opcode::Dey(value)),
             _ => None,
         }
     }
