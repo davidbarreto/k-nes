@@ -14,20 +14,20 @@ impl LoadStore for Cpu {
 
     fn lda(&mut self, data: u8) {
         self.registers.accumulator = data;
-        self.registers.status.update_flag(CpuFlags::ZERO, data == 0);
-        self.registers.status.update_flag(CpuFlags::NEGATIVE, data & 0x80 == 0x80);
+        self.registers.status.set(CpuFlags::ZERO, data == 0);
+        self.registers.status.set(CpuFlags::NEGATIVE, data & 0x80 == 0x80);
     }
 
     fn ldx(&mut self, data: u8) {
         self.registers.x_register = data;
-        self.registers.status.update_flag(CpuFlags::ZERO, data == 0);
-        self.registers.status.update_flag(CpuFlags::NEGATIVE, data & 0x80 == 0x80);
+        self.registers.status.set(CpuFlags::ZERO, data == 0);
+        self.registers.status.set(CpuFlags::NEGATIVE, data & 0x80 == 0x80);
     }
 
     fn ldy(&mut self, data: u8) {
         self.registers.y_register = data;
-        self.registers.status.update_flag(CpuFlags::ZERO, data == 0);
-        self.registers.status.update_flag(CpuFlags::NEGATIVE, data & 0x80 == 0x80);
+        self.registers.status.set(CpuFlags::ZERO, data == 0);
+        self.registers.status.set(CpuFlags::NEGATIVE, data & 0x80 == 0x80);
     }
 
     fn sta(&mut self, address: u8) {

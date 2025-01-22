@@ -19,18 +19,18 @@ impl Arithmetic for Cpu {
 
         self.registers
             .status
-            .update_flag(CpuFlags::CARRY, carry_1 || carry_2);
+            .set(CpuFlags::CARRY, carry_1 || carry_2);
         self.registers
             .status
-            .update_flag(CpuFlags::ZERO, result == 0);
+            .set(CpuFlags::ZERO, result == 0);
         self.registers
             .status
-            .update_flag(CpuFlags::NEGATIVE, result & 0x80 == 0x80);
+            .set(CpuFlags::NEGATIVE, result & 0x80 == 0x80);
 
         // For overflow, we need to check if the sign bit of the accumulator and the sign bit of the data
         // are different from the sign bit of the result
         // For detailed explanation, see https://www.righto.com/2012/12/the-6502-overflow-flag-explained.html
-        self.registers.status.update_flag(
+        self.registers.status.set(
             CpuFlags::OVERFLOW,
             (self.registers.accumulator ^ result) & (data ^ result) & 0x80 != 0,
         );
@@ -70,9 +70,9 @@ impl Arithmetic for Cpu {
 }
 
 fn compare(cpu: &mut Cpu, register: u8, data: u8) {
-    cpu.registers.status.update_flag(CpuFlags::CARRY, register >= data);
-    cpu.registers.status.update_flag(CpuFlags::ZERO, register == data);
-    cpu.registers.status.update_flag(CpuFlags::NEGATIVE, register & 0x80 == 0x80);  
+    cpu.registers.status.set(CpuFlags::CARRY, register >= data);
+    cpu.registers.status.set(CpuFlags::ZERO, register == data);
+    cpu.registers.status.set(CpuFlags::NEGATIVE, register & 0x80 == 0x80);  
 }
 
 #[cfg(test)]

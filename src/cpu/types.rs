@@ -17,13 +17,3 @@ bitflags! {
         const NEGATIVE          = 0b10000000;
     }
 }
-
-impl CpuFlags {
-    pub fn update_flag(&mut self, flag: CpuFlags, condition: bool) {
-        if condition {
-            self.insert(flag);
-        } else {
-            self.remove(flag);
-        }
-    }
-}

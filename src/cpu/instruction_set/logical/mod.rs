@@ -17,10 +17,10 @@ impl Logical for Cpu {
 
         self.registers
             .status
-            .update_flag(CpuFlags::ZERO, result == 0);
+            .set(CpuFlags::ZERO, result == 0);
         self.registers
             .status
-            .update_flag(CpuFlags::NEGATIVE, result & 0x80 == 0x80);
+            .set(CpuFlags::NEGATIVE, result & 0x80 == 0x80);
 
         self.registers.accumulator = result;
     }
@@ -33,10 +33,10 @@ impl Logical for Cpu {
 
         self.registers
             .status
-            .update_flag(CpuFlags::ZERO, result == 0);
+            .set(CpuFlags::ZERO, result == 0);
         self.registers
             .status
-            .update_flag(CpuFlags::NEGATIVE, result & 0x80 == 0x80);
+            .set(CpuFlags::NEGATIVE, result & 0x80 == 0x80);
 
         self.registers.accumulator = result;
     }
@@ -49,10 +49,10 @@ impl Logical for Cpu {
 
         self.registers
             .status
-            .update_flag(CpuFlags::ZERO, result == 0);
+            .set(CpuFlags::ZERO, result == 0);
         self.registers
             .status
-            .update_flag(CpuFlags::NEGATIVE, result & 0x80 == 0x80);
+            .set(CpuFlags::NEGATIVE, result & 0x80 == 0x80);
 
         self.registers.accumulator = result;
     }
@@ -65,17 +65,17 @@ impl Logical for Cpu {
         // Update Zero flag
         self.registers
             .status
-            .update_flag(CpuFlags::ZERO, result == 0);
+            .set(CpuFlags::ZERO, result == 0);
 
         // Update Negative flag (bit 7 of the operand)
         self.registers
             .status
-            .update_flag(CpuFlags::NEGATIVE, data & 0x80 == 0x80);
+            .set(CpuFlags::NEGATIVE, data & 0x80 == 0x80);
 
         // Update Overflow flag (bit 6 of the operand)
         self.registers
             .status
-            .update_flag(CpuFlags::OVERFLOW, data & 0x40 == 0x40);
+            .set(CpuFlags::OVERFLOW, data & 0x40 == 0x40);
     }
 }
 
