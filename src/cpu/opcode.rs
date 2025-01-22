@@ -87,6 +87,13 @@ const STX_ABSOLUTE: u8 = 0x8E;
 const STY_ZERO_PAGE: u8 = 0x84;
 const STY_ZERO_PAGE_X: u8 = 0x94;
 const STY_ABSOLUTE: u8 = 0x8C;
+const CLC: u8 = 0x18;
+const CLD: u8 = 0xD8;
+const CLI: u8 = 0x58;
+const CLV: u8 = 0xB8;
+const SEC: u8 = 0x38;
+const SED: u8 = 0xF8;
+const SEI: u8 = 0x78;
 const BPL: u8 = 0x10;
 const BMI: u8 = 0x30;
 const BVC: u8 = 0x50;
@@ -130,6 +137,20 @@ pub enum Opcode {
     Stx(u8, AddressingMode),
     /// Store Y Register
     Sty(u8, AddressingMode),
+    /// Clear Carry Flag
+    Clc,
+    /// Clear Decimal Mode
+    Cld,
+    /// Clear Interrupt Disable
+    Cli,
+    /// Clear Overflow Flag
+    Clv,
+    /// Set Carry Flag
+    Sec,
+    /// Set Decimal Mode
+    Sed,
+    /// Set Interrupt Disable
+    Sei,
     /// Branch on PLus
     Bpl(u8),
     /// Branch on Minus
@@ -238,6 +259,13 @@ impl Opcode {
             STY_ZERO_PAGE => Some(Opcode::Sty(value, AddressingMode::ZeroPage)),
             STY_ZERO_PAGE_X => Some(Opcode::Sty(value, AddressingMode::ZeroPageX)),
             STY_ABSOLUTE => Some(Opcode::Sty(value, AddressingMode::Absolute)),
+            CLC => Some(Opcode::Clc),
+            CLD => Some(Opcode::Cld),
+            CLI => Some(Opcode::Cli),
+            CLV => Some(Opcode::Clv),
+            SEC => Some(Opcode::Sec),
+            SED => Some(Opcode::Sed),
+            SEI => Some(Opcode::Sei),
             BPL => Some(Opcode::Bpl(value)),
             BMI => Some(Opcode::Bmi(value)),
             BVC => Some(Opcode::Bvc(value)),
