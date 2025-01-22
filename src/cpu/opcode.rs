@@ -8,63 +8,93 @@ pub const ADC_ABSOLUTE_X: u8 = 0x7D;
 pub const ADC_ABSOLUTE_Y: u8 = 0x79;
 pub const ADC_INDIRECT_X: u8 = 0x61;
 pub const ADC_INDIRECT_Y: u8 = 0x71;
-
-pub const SBC_IMMEDIATE: u8 = 0xE9;
-pub const SBC_ZERO_PAGE: u8 = 0xE5;
-pub const SBC_ZERO_PAGE_X: u8 = 0xF5;
-pub const SBC_ABSOLUTE: u8 = 0xED;
-pub const SBC_ABSOLUTE_X: u8 = 0xFD;
-pub const SBC_ABSOLUTE_Y: u8 = 0xF9;
-pub const SBC_INDIRECT_X: u8 = 0xE1;
-pub const SBC_INDIRECT_Y: u8 = 0xF1;
-
-pub const CMP_IMMEDIATE: u8 = 0xC9;
-pub const CMP_ZERO_PAGE: u8 = 0xC5;
-pub const CMP_ZERO_PAGE_X: u8 = 0xD5;
-pub const CMP_ABSOLUTE: u8 = 0xCD;
-pub const CMP_ABSOLUTE_X: u8 = 0xDD;
-pub const CMP_ABSOLUTE_Y: u8 = 0xD9;
-pub const CMP_INDIRECT_X: u8 = 0xC1;
-pub const CMP_INDIRECT_Y: u8 = 0xD1;
-
-pub const AND_IMMEDIATE: u8 = 0x29;
-pub const AND_ZERO_PAGE: u8 = 0x25;
-pub const AND_ZERO_PAGE_X: u8 = 0x35;
-pub const AND_ABSOLUTE: u8 = 0x2D;
-pub const AND_ABSOLUTE_X: u8 = 0x3D;
-pub const AND_ABSOLUTE_Y: u8 = 0x39;
-pub const AND_INDIRECT_X: u8 = 0x21;
-pub const AND_INDIRECT_Y: u8 = 0x31;
-
-pub const ORA_IMMEDIATE: u8 = 0x09;
-pub const ORA_ZERO_PAGE: u8 = 0x05;
-pub const ORA_ZERO_PAGE_X: u8 = 0x15;
-pub const ORA_ABSOLUTE: u8 = 0x0D;
-pub const ORA_ABSOLUTE_X: u8 = 0x1D;
-pub const ORA_ABSOLUTE_Y: u8 = 0x19;
-pub const ORA_INDIRECT_X: u8 = 0x01;
-pub const ORA_INDIRECT_Y: u8 = 0x11;
-
-pub const EOR_IMMEDIATE: u8 = 0x49;
-pub const EOR_ZERO_PAGE: u8 = 0x45;
-pub const EOR_ZERO_PAGE_X: u8 = 0x55;
-pub const EOR_ABSOLUTE: u8 = 0x4D;
-pub const EOR_ABSOLUTE_X: u8 = 0x5D;
-pub const EOR_ABSOLUTE_Y: u8 = 0x59;
-pub const EOR_INDIRECT_X: u8 = 0x41;
-pub const EOR_INDIRECT_Y: u8 = 0x51;
-
-pub const BIT_ZERO_PAGE: u8 = 0x24;
-pub const BIT_ABSOLUTE: u8 = 0x2C;
-
-pub const BPL: u8 = 0x10;
-pub const BMI: u8 = 0x30;
-pub const BVC: u8 = 0x50;
-pub const BVS: u8 = 0x70;
-pub const BCC: u8 = 0x90;
-pub const BCS: u8 = 0xB0;
-pub const BNE: u8 = 0xD0;
-pub const BEQ: u8 = 0xF0;
+const SBC_IMMEDIATE: u8 = 0xE9;
+const SBC_ZERO_PAGE: u8 = 0xE5;
+const SBC_ZERO_PAGE_X: u8 = 0xF5;
+const SBC_ABSOLUTE: u8 = 0xED;
+const SBC_ABSOLUTE_X: u8 = 0xFD;
+const SBC_ABSOLUTE_Y: u8 = 0xF9;
+const SBC_INDIRECT_X: u8 = 0xE1;
+const SBC_INDIRECT_Y: u8 = 0xF1;
+const CMP_IMMEDIATE: u8 = 0xC9;
+const CMP_ZERO_PAGE: u8 = 0xC5;
+const CMP_ZERO_PAGE_X: u8 = 0xD5;
+const CMP_ABSOLUTE: u8 = 0xCD;
+const CMP_ABSOLUTE_X: u8 = 0xDD;
+const CMP_ABSOLUTE_Y: u8 = 0xD9;
+const CMP_INDIRECT_X: u8 = 0xC1;
+const CMP_INDIRECT_Y: u8 = 0xD1;
+const CPX_IMMEDIATE: u8 = 0xE0;
+const CPX_ZERO_PAGE: u8 = 0xE4;
+const CPX_ABSOLUTE: u8 = 0xEC;
+const CPY_IMMEDIATE: u8 = 0xC0;
+const CPY_ZERO_PAGE: u8 = 0xC4;
+const CPY_ABSOLUTE: u8 = 0xCC;
+const AND_IMMEDIATE: u8 = 0x29;
+const AND_ZERO_PAGE: u8 = 0x25;
+const AND_ZERO_PAGE_X: u8 = 0x35;
+const AND_ABSOLUTE: u8 = 0x2D;
+const AND_ABSOLUTE_X: u8 = 0x3D;
+const AND_ABSOLUTE_Y: u8 = 0x39;
+const AND_INDIRECT_X: u8 = 0x21;
+const AND_INDIRECT_Y: u8 = 0x31;
+const ORA_IMMEDIATE: u8 = 0x09;
+const ORA_ZERO_PAGE: u8 = 0x05;
+const ORA_ZERO_PAGE_X: u8 = 0x15;
+const ORA_ABSOLUTE: u8 = 0x0D;
+const ORA_ABSOLUTE_X: u8 = 0x1D;
+const ORA_ABSOLUTE_Y: u8 = 0x19;
+const ORA_INDIRECT_X: u8 = 0x01;
+const ORA_INDIRECT_Y: u8 = 0x11;
+const EOR_IMMEDIATE: u8 = 0x49;
+const EOR_ZERO_PAGE: u8 = 0x45;
+const EOR_ZERO_PAGE_X: u8 = 0x55;
+const EOR_ABSOLUTE: u8 = 0x4D;
+const EOR_ABSOLUTE_X: u8 = 0x5D;
+const EOR_ABSOLUTE_Y: u8 = 0x59;
+const EOR_INDIRECT_X: u8 = 0x41;
+const EOR_INDIRECT_Y: u8 = 0x51;
+const BIT_ZERO_PAGE: u8 = 0x24;
+const BIT_ABSOLUTE: u8 = 0x2C;
+const LDA_IMMEDIATE: u8 = 0xA9;
+const LDA_ZERO_PAGE: u8 = 0xA5;
+const LDA_ZERO_PAGE_X: u8 = 0xB5;
+const LDA_ABSOLUTE: u8 = 0xAD;
+const LDA_ABSOLUTE_X: u8 = 0xBD;
+const LDA_ABSOLUTE_Y: u8 = 0xB9;
+const LDA_INDIRECT_X: u8 = 0xA1;
+const LDA_INDIRECT_Y: u8 = 0xB1;
+const LDX_IMMEDIATE: u8 = 0xA2;
+const LDX_ZERO_PAGE: u8 = 0xA6;
+const LDX_ZERO_PAGE_Y: u8 = 0xB6;
+const LDX_ABSOLUTE: u8 = 0xAE;
+const LDX_ABSOLUTE_Y: u8 = 0xBE;
+const LDY_IMMEDIATE: u8 = 0xA0;
+const LDY_ZERO_PAGE: u8 = 0xA4;
+const LDY_ZERO_PAGE_X: u8 = 0xB4;
+const LDY_ABSOLUTE: u8 = 0xAC;
+const LDY_ABSOLUTE_X: u8 = 0xBC;
+const STA_ZERO_PAGE: u8 = 0x85;
+const STA_ZERO_PAGE_X: u8 = 0x95;
+const STA_ABSOLUTE: u8 = 0x8D;
+const STA_ABSOLUTE_X: u8 = 0x9D;
+const STA_ABSOLUTE_Y: u8 = 0x99;
+const STA_INDIRECT_X: u8 = 0x81;
+const STA_INDIRECT_Y: u8 = 0x91;
+const STX_ZERO_PAGE: u8 = 0x86;
+const STX_ZERO_PAGE_Y: u8 = 0x96;
+const STX_ABSOLUTE: u8 = 0x8E;
+const STY_ZERO_PAGE: u8 = 0x84;
+const STY_ZERO_PAGE_X: u8 = 0x94;
+const STY_ABSOLUTE: u8 = 0x8C;
+const BPL: u8 = 0x10;
+const BMI: u8 = 0x30;
+const BVC: u8 = 0x50;
+const BVS: u8 = 0x70;
+const BCC: u8 = 0x90;
+const BCS: u8 = 0xB0;
+const BNE: u8 = 0xD0;
+const BEQ: u8 = 0xF0;
 
 /// Opcodes of instruction set for 6502 processor
 /// see: [6502 docs](http://www.6502.org/tutorials/6502opcodes.html)
@@ -74,8 +104,12 @@ pub enum Opcode {
     Adc(u8, AddressingMode),
     /// Subtract with Carry
     Sbc(u8, AddressingMode),
-    /// Compare
+    /// Compare with Accumulator
     Cmp(u8, AddressingMode),
+    // Compare with X Register
+    Cpx(u8, AddressingMode),
+    /// Compare with Y Register
+    Cpy(u8, AddressingMode),
     /// Bitwise And with accumulator
     And(u8, AddressingMode),
     /// Bitwise Or with accumulator
@@ -84,6 +118,18 @@ pub enum Opcode {
     Eor(u8, AddressingMode),
     /// Bit Test
     Bit(u8, AddressingMode),
+    /// Load Accumulator
+    Lda(u8, AddressingMode),
+    /// Load X Register
+    Ldx(u8, AddressingMode),
+    /// Load Y Register
+    Ldy(u8, AddressingMode),
+    /// Store Accumulator
+    Sta(u8, AddressingMode),
+    /// Store X Register
+    Stx(u8, AddressingMode),
+    /// Store Y Register
+    Sty(u8, AddressingMode),
     /// Branch on PLus
     Bpl(u8),
     /// Branch on Minus
@@ -129,6 +175,12 @@ impl Opcode {
             CMP_ABSOLUTE_Y => Some(Opcode::Cmp(value, AddressingMode::AbsoluteY)),
             CMP_INDIRECT_X => Some(Opcode::Cmp(value, AddressingMode::IndirectX)),
             CMP_INDIRECT_Y => Some(Opcode::Cmp(value, AddressingMode::IndirectY)),
+            CPX_IMMEDIATE => Some(Opcode::Cpx(value, AddressingMode::Immediate)),
+            CPX_ZERO_PAGE => Some(Opcode::Cpx(value, AddressingMode::ZeroPage)),
+            CPX_ABSOLUTE => Some(Opcode::Cpx(value, AddressingMode::Absolute)),
+            CPY_IMMEDIATE => Some(Opcode::Cpy(value, AddressingMode::Immediate)),
+            CPY_ZERO_PAGE => Some(Opcode::Cpy(value, AddressingMode::ZeroPage)),
+            CPY_ABSOLUTE => Some(Opcode::Cpy(value, AddressingMode::Absolute)),
             AND_IMMEDIATE => Some(Opcode::And(value, AddressingMode::Immediate)),
             AND_ZERO_PAGE => Some(Opcode::And(value, AddressingMode::ZeroPage)),
             AND_ZERO_PAGE_X => Some(Opcode::And(value, AddressingMode::ZeroPageX)),
@@ -155,6 +207,37 @@ impl Opcode {
             EOR_INDIRECT_Y => Some(Opcode::Eor(value, AddressingMode::IndirectY)),
             BIT_ZERO_PAGE => Some(Opcode::Bit(value, AddressingMode::ZeroPage)),
             BIT_ABSOLUTE => Some(Opcode::Bit(value, AddressingMode::Absolute)),
+            LDA_IMMEDIATE => Some(Opcode::Lda(value, AddressingMode::Immediate)),
+            LDA_ZERO_PAGE => Some(Opcode::Lda(value, AddressingMode::ZeroPage)),
+            LDA_ZERO_PAGE_X => Some(Opcode::Lda(value, AddressingMode::ZeroPageX)),
+            LDA_ABSOLUTE => Some(Opcode::Lda(value, AddressingMode::Absolute)),
+            LDA_ABSOLUTE_X => Some(Opcode::Lda(value, AddressingMode::AbsoluteX)),
+            LDA_ABSOLUTE_Y => Some(Opcode::Lda(value, AddressingMode::AbsoluteY)),
+            LDA_INDIRECT_X => Some(Opcode::Lda(value, AddressingMode::IndirectX)),
+            LDA_INDIRECT_Y => Some(Opcode::Lda(value, AddressingMode::IndirectY)),
+            LDX_IMMEDIATE => Some(Opcode::Ldx(value, AddressingMode::Immediate)),
+            LDX_ZERO_PAGE => Some(Opcode::Ldx(value, AddressingMode::ZeroPage)),
+            LDX_ZERO_PAGE_Y => Some(Opcode::Ldx(value, AddressingMode::ZeroPageY)),
+            LDX_ABSOLUTE => Some(Opcode::Ldx(value, AddressingMode::Absolute)),
+            LDX_ABSOLUTE_Y => Some(Opcode::Ldx(value, AddressingMode::AbsoluteY)),
+            LDY_IMMEDIATE => Some(Opcode::Ldy(value, AddressingMode::Immediate)),
+            LDY_ZERO_PAGE => Some(Opcode::Ldy(value, AddressingMode::ZeroPage)),
+            LDY_ZERO_PAGE_X => Some(Opcode::Ldy(value, AddressingMode::ZeroPageX)),
+            LDY_ABSOLUTE => Some(Opcode::Ldy(value, AddressingMode::Absolute)),
+            LDY_ABSOLUTE_X => Some(Opcode::Ldy(value, AddressingMode::AbsoluteX)),
+            STA_ZERO_PAGE => Some(Opcode::Sta(value, AddressingMode::ZeroPage)),
+            STA_ZERO_PAGE_X => Some(Opcode::Sta(value, AddressingMode::ZeroPageX)),
+            STA_ABSOLUTE => Some(Opcode::Sta(value, AddressingMode::Absolute)),
+            STA_ABSOLUTE_X => Some(Opcode::Sta(value, AddressingMode::AbsoluteX)),
+            STA_ABSOLUTE_Y => Some(Opcode::Sta(value, AddressingMode::AbsoluteY)),
+            STA_INDIRECT_X => Some(Opcode::Sta(value, AddressingMode::IndirectX)),
+            STA_INDIRECT_Y => Some(Opcode::Sta(value, AddressingMode::IndirectY)),
+            STX_ZERO_PAGE => Some(Opcode::Stx(value, AddressingMode::ZeroPage)),
+            STX_ZERO_PAGE_Y => Some(Opcode::Stx(value, AddressingMode::ZeroPageY)),
+            STX_ABSOLUTE => Some(Opcode::Stx(value, AddressingMode::Absolute)),
+            STY_ZERO_PAGE => Some(Opcode::Sty(value, AddressingMode::ZeroPage)),
+            STY_ZERO_PAGE_X => Some(Opcode::Sty(value, AddressingMode::ZeroPageX)),
+            STY_ABSOLUTE => Some(Opcode::Sty(value, AddressingMode::Absolute)),
             BPL => Some(Opcode::Bpl(value)),
             BMI => Some(Opcode::Bmi(value)),
             BVC => Some(Opcode::Bvc(value)),
