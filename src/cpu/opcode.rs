@@ -94,14 +94,14 @@ const CLV: u8 = 0xB8;
 const SEC: u8 = 0x38;
 const SED: u8 = 0xF8;
 const SEI: u8 = 0x78;
-const BPL: u8 = 0x10;
-const BMI: u8 = 0x30;
-const BVC: u8 = 0x50;
-const BVS: u8 = 0x70;
 const BCC: u8 = 0x90;
 const BCS: u8 = 0xB0;
-const BNE: u8 = 0xD0;
 const BEQ: u8 = 0xF0;
+const BMI: u8 = 0x30;
+const BNE: u8 = 0xD0;
+const BPL: u8 = 0x10;
+const BVC: u8 = 0x50;
+const BVS: u8 = 0x70;
 
 /// Opcodes of instruction set for 6502 processor
 /// see: [6502 docs](http://www.6502.org/tutorials/6502opcodes.html)
@@ -266,14 +266,14 @@ impl Opcode {
             SEC => Some(Opcode::Sec),
             SED => Some(Opcode::Sed),
             SEI => Some(Opcode::Sei),
-            BPL => Some(Opcode::Bpl(value)),
-            BMI => Some(Opcode::Bmi(value)),
-            BVC => Some(Opcode::Bvc(value)),
-            BVS => Some(Opcode::Bvs(value)),
             BCC => Some(Opcode::Bcc(value)),
             BCS => Some(Opcode::Bcs(value)),
-            BNE => Some(Opcode::Bne(value)),
             BEQ => Some(Opcode::Beq(value)),
+            BMI => Some(Opcode::Bmi(value)),
+            BNE => Some(Opcode::Bne(value)),
+            BPL => Some(Opcode::Bpl(value)),
+            BVC => Some(Opcode::Bvc(value)),
+            BVS => Some(Opcode::Bvs(value)),
             _ => None,
         }
     }
