@@ -102,6 +102,12 @@ const BNE: u8 = 0xD0;
 const BPL: u8 = 0x10;
 const BVC: u8 = 0x50;
 const BVS: u8 = 0x70;
+const TAX: u8 = 0xAA;
+const TAY: u8 = 0xA8;
+const TXA: u8 = 0x8A;
+const TYA: u8 = 0x98;
+const TSX: u8 = 0xBA;
+const TXS: u8 = 0x9A;
 
 /// Opcodes of instruction set for 6502 processor
 /// see: [6502 docs](http://www.6502.org/tutorials/6502opcodes.html)
@@ -167,6 +173,18 @@ pub enum Opcode {
     Bne(u8),
     /// Branch on Equal
     Beq(u8),
+    /// Transfer Accumulator to X
+    Tax(u8),
+    /// Transfer Accumulator to Y
+    Tay(u8),
+    /// Transfer X to Accumulator
+    Txa(u8),
+    /// Transfer Y to Accumulator
+    Tya(u8),
+    /// Transfer Stack Pointer to X
+    Tsx(u8),
+    /// Transfer X to Stack Pointer
+    Txs(u8),
 }
 
 impl Opcode {
@@ -274,6 +292,12 @@ impl Opcode {
             BPL => Some(Opcode::Bpl(value)),
             BVC => Some(Opcode::Bvc(value)),
             BVS => Some(Opcode::Bvs(value)),
+            TAX => Some(Opcode::Tax(value)),
+            TAY => Some(Opcode::Tay(value)),
+            TXA => Some(Opcode::Txa(value)),
+            TYA => Some(Opcode::Tya(value)),
+            TSX => Some(Opcode::Tsx(value)),
+            TXS => Some(Opcode::Txs(value)),
             _ => None,
         }
     }
