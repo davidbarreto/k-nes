@@ -294,8 +294,6 @@ fn test_example_program() {
 }
 
 #[test]
-// TODO Configure test for the following program
-// FIXME PC increment after each instruction should depend on instruction data size
 fn test_example_program_2() {
     
     // Program test:
