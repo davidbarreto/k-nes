@@ -79,9 +79,10 @@ impl Cpu {
 
             AddressingMode::Immediate => self.registers.program_counter,
 
-            AddressingMode::Indirect => self
-                .memory
-                .read_u16(self.memory.read_u16(self.registers.program_counter)),
+            AddressingMode::Indirect => {
+                self.memory.read_u16(
+                    self.memory.read_u16(self.registers.program_counter))
+            },
 
             AddressingMode::IndirectX => {
                 let base = self.memory.read(self.registers.program_counter);
