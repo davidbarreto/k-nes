@@ -11,6 +11,7 @@ use instruction_set::arithmetic::Arithmetic;
 use instruction_set::load_store::LoadStore;
 use instruction_set::register_transfers::RegisterTransfers;
 use instruction_set::increments_decrements::IncrementsDecrements;
+use instruction_set::branches::Branches;
 
 use register_bank::RegisterBank;
 use opcode::Opcode;
@@ -42,7 +43,8 @@ impl Cpu {
     pub fn execute_program(&mut self) -> Result<(), InstructionError> {
         loop {
             let opcode = self.memory.read(self.registers.program_counter);
-            if opcode == 0x00 {
+            if opcode == opcode::BRK {
+                self.registers.program_counter += 1;
                 break;
             }
             match self.execute_instruction(opcode) {
@@ -54,32 +56,64 @@ impl Cpu {
     }
 
     fn execute_instruction(&mut self, op: u8) -> Result<(), InstructionError> {
+        
+        let current_addressing_mode: AddressingMode;
         if let Some(opcode) = Opcode::from_u8(op) {
+            
             self.registers.program_counter += 1;
 
             match opcode {
                 Opcode::Adc(_, addressing_mode) => {
                     let data: u8 = self.memory.read(self.calculate_address(addressing_mode));
                     self.adc(data);
-                    self.registers.program_counter += 1;
+                    current_addressing_mode = addressing_mode;
                 },
                 Opcode::Lda(_, addressing_mode) => {
                     let data: u8 = self.memory.read(self.calculate_address(addressing_mode));
                     self.lda(data);
-                    self.registers.program_counter += 1;
+                    current_addressing_mode = addressing_mode;
                 },
-                Opcode::Tax(_) => {
+                Opcode::Ldx(_, addressing_mode) => {
+                    let data: u8 = self.memory.read(self.calculate_address(addressing_mode));
+                    self.ldx(data);
+                    current_addressing_mode = addressing_mode;
+                },
+                Opcode::Dex(_, addressing_mode) => {
+                    self.dex();
+                    current_addressing_mode = addressing_mode;
+                },
+                Opcode::Tax(_, addressing_mode) => {
                     self.tax();
+                    current_addressing_mode = addressing_mode;
                 },
-                Opcode::Inx(_) => {
+                Opcode::Inx(_, addressing_mode) => {
                     self.inx();
+                    current_addressing_mode = addressing_mode;
                 },
-                _ => (),
+                Opcode::Stx(_, addressing_mode) => {
+                    let data: u16 = self.calculate_address(addressing_mode);
+                    self.stx(data);
+                    current_addressing_mode = addressing_mode;
+                },
+                Opcode::Cpx(_, addressing_mode) => {
+                    let data: u8 = self.memory.read(self.calculate_address(addressing_mode));
+                    self.cpx(data);
+                    current_addressing_mode = addressing_mode;
+                },
+                Opcode::Bne(_, addressing_mode) => {
+                    let data: u8 = self.memory.read(self.calculate_address(addressing_mode));
+                    self.bne(data);
+                    current_addressing_mode = addressing_mode;
+                },
+                _ => {
+                    return Err(InstructionError::NotImplementedInstruction(op));
+                },
             }
         } else {
             return Err(InstructionError::InvalidOpcode(op));
         }
 
+        self.registers.program_counter += current_addressing_mode.byte_size() as u16 - 1;
         Ok(())
     }
 
@@ -127,6 +161,10 @@ impl Cpu {
             AddressingMode::ZeroPageY => {
                 let address = self.memory.read(self.registers.program_counter);
                 address.wrapping_add(self.registers.y_register) as u16
+            }
+
+            AddressingMode::Relative => {
+                self.registers.program_counter
             }
 
             _ => panic!("Addressing mode {:?} not available", mode),

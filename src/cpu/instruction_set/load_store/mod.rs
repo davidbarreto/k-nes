@@ -5,9 +5,9 @@ pub trait LoadStore {
     fn lda(&mut self, data: u8);
     fn ldx(&mut self, data: u8);
     fn ldy(&mut self, data: u8);
-    fn sta(&mut self, address: u8);
-    fn stx(&mut self, address: u8);
-    fn sty(&mut self, address: u8);
+    fn sta(&mut self, address: u16);
+    fn stx(&mut self, address: u16);
+    fn sty(&mut self, address: u16);
 }
 
 impl LoadStore for Cpu {
@@ -30,16 +30,16 @@ impl LoadStore for Cpu {
         self.registers.status.set(CpuFlags::NEGATIVE, data & 0x80 == 0x80);
     }
 
-    fn sta(&mut self, address: u8) {
-        self.memory.write(self.registers.accumulator, address as u16);
+    fn sta(&mut self, address: u16) {
+        self.memory.write(self.registers.accumulator, address);
     }
 
-    fn stx(&mut self, address: u8) {
-        self.memory.write(self.registers.x_register, address as u16);
+    fn stx(&mut self, address: u16) {
+        self.memory.write(self.registers.x_register, address);
     }
 
-    fn sty(&mut self, address: u8) {
-        self.memory.write(self.registers.y_register, address as u16);
+    fn sty(&mut self, address: u16) {
+        self.memory.write(self.registers.y_register, address);
     }
 }
 
