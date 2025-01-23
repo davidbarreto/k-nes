@@ -274,4 +274,46 @@ fn execute_adc_indirect_y_with_high_y_value() {
     assert_eq!(cpu.registers.accumulator, expected_result);
 }
 
+#[test]
+fn test_example_program() {
+    
+    // Program test:
+    // Address  Hexdump   Dissassembly
+    // -------------------------------
+    // $0600    a9 c0     LDA #$c0
+    // $0602    aa        TAX 
+    // $0603    e8        INX 
+    // $0604    69 c4     ADC #$c4
+    // $0606    00        BRK 
+    let program: [u8; 7] = [0xA9, 0xC0, 0xAA, 0xE8, 0x69, 0xC4, 0x00];
+    let program_address: u16 = 0x0600;
+    let mut cpu = Cpu::new();
+
+    // Load program into memory, starting at 'program_address'
+    cpu.memory.write_array(&program, program_address);
+    cpu.registers.program_counter = program_address;
+    cpu.execute_program();
+
+    assert_eq!(cpu.registers.accumulator, 0x84);
+    assert_eq!(cpu.registers.x_register, 0xC1);
+}
+
+#[test]
+// TODO Configure test for the following program
+// FIXME PC increment after each instruction should depend on instruction data size
+fn test_example_program_2() {
+    
+    // Program test:
+    // Address  Hexdump   Dissassembly
+    // -------------------------------
+    // $0600    a2 08     LDX #$08
+    // $0602    ca        DEX 
+    // $0603    8e 00 02  STX $0200
+    // $0606    e0 03     CPX #$03
+    // $0608    d0 f8     BNE $0602
+    // $060a    8e 01 02  STX $0201
+    // $060d    00        BRK
+    assert!(true);
+}
+
 // TODO Add tests for other addressing modes

@@ -8,6 +8,10 @@ use crate::memory::Memory;
 use crate::memory::types::AddressingMode;
 
 use instruction_set::arithmetic::Arithmetic;
+use instruction_set::load_store::LoadStore;
+use instruction_set::register_transfers::RegisterTransfers;
+use instruction_set::increments_decrements::IncrementsDecrements;
+
 use register_bank::RegisterBank;
 use opcode::Opcode;
 use types::InstructionError;
@@ -36,10 +40,17 @@ impl Cpu {
     }
 
     pub fn execute_program(&mut self) -> Result<(), InstructionError> {
-        //loop {
+        loop {
             let opcode = self.memory.read(self.registers.program_counter);
-            self.execute_instruction(opcode)
-        //}
+            if opcode == 0x00 {
+                break;
+            }
+            match self.execute_instruction(opcode) {
+                Err(instruction_error) => return Err(instruction_error),
+                Ok(_) => ()
+            }
+        }
+        Ok(())
     }
 
     fn execute_instruction(&mut self, op: u8) -> Result<(), InstructionError> {
@@ -50,7 +61,19 @@ impl Cpu {
                 Opcode::Adc(_, addressing_mode) => {
                     let data: u8 = self.memory.read(self.calculate_address(addressing_mode));
                     self.adc(data);
-                }
+                    self.registers.program_counter += 1;
+                },
+                Opcode::Lda(_, addressing_mode) => {
+                    let data: u8 = self.memory.read(self.calculate_address(addressing_mode));
+                    self.lda(data);
+                    self.registers.program_counter += 1;
+                },
+                Opcode::Tax(_) => {
+                    self.tax();
+                },
+                Opcode::Inx(_) => {
+                    self.inx();
+                },
                 _ => (),
             }
         } else {
