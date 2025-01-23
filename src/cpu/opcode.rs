@@ -1,7 +1,6 @@
-use std::ops::Add;
-
 use crate::memory::types::AddressingMode;
 
+pub const BRK: u8 = 0x00;
 pub const ADC_IMMEDIATE: u8 = 0x69;
 pub const ADC_ZERO_PAGE: u8 = 0x65;
 pub const ADC_ZERO_PAGE_X: u8 = 0x75;
@@ -144,7 +143,15 @@ const ROR_ABSOLUTE: u8 = 0x6E;
 const ROR_ABSOLUTE_X: u8 = 0x7E;
 
 /// Opcodes of instruction set for 6502 processor
+///
+/// Each variant of this enum represents a specific instruction in the 6502 instruction set.
+/// - The `u8` parameter represents the opcode value;
+/// - The `AddressingMode` parameter
+/// represents the addressing mode used by the instruction
+/// (how the instruction will extract it's data. E.g. from memory/registers, and how);
+///
 /// see: [6502 docs](http://www.6502.org/tutorials/6502opcodes.html)
+/// 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Opcode {
     /// Add with Carry
@@ -178,59 +185,59 @@ pub enum Opcode {
     /// Store Y Register
     Sty(u8, AddressingMode),
     /// Clear Carry Flag
-    Clc,
+    Clc(u8, AddressingMode),
     /// Clear Decimal Mode
-    Cld,
+    Cld(u8, AddressingMode),
     /// Clear Interrupt Disable
-    Cli,
+    Cli(u8, AddressingMode),
     /// Clear Overflow Flag
-    Clv,
+    Clv(u8, AddressingMode),
     /// Set Carry Flag
-    Sec,
+    Sec(u8, AddressingMode),
     /// Set Decimal Mode
-    Sed,
+    Sed(u8, AddressingMode),
     /// Set Interrupt Disable
-    Sei,
+    Sei(u8, AddressingMode),
     /// Branch on PLus
-    Bpl(u8),
+    Bpl(u8, AddressingMode),
     /// Branch on Minus
-    Bmi(u8),
+    Bmi(u8, AddressingMode),
     /// Branch on Overflow Clear
-    Bvc(u8),
+    Bvc(u8, AddressingMode),
     /// Branch on Overflow Set
-    Bvs(u8),
+    Bvs(u8, AddressingMode),
     /// Branch on Carry Clear
-    Bcc(u8),
+    Bcc(u8, AddressingMode),
     /// Branch on Carry Set
-    Bcs(u8),
+    Bcs(u8, AddressingMode),
     /// Branch on Not Equal
-    Bne(u8),
+    Bne(u8, AddressingMode),
     /// Branch on Equal
-    Beq(u8),
+    Beq(u8, AddressingMode),
     /// Transfer Accumulator to X
-    Tax(u8),
+    Tax(u8, AddressingMode),
     /// Transfer Accumulator to Y
-    Tay(u8),
+    Tay(u8, AddressingMode),
     /// Transfer X to Accumulator
-    Txa(u8),
+    Txa(u8, AddressingMode),
     /// Transfer Y to Accumulator
-    Tya(u8),
+    Tya(u8, AddressingMode),
     /// Transfer Stack Pointer to X
-    Tsx(u8),
+    Tsx(u8, AddressingMode),
     /// Transfer X to Stack Pointer
-    Txs(u8),
+    Txs(u8, AddressingMode),
     /// Increment Memory
     Inc(u8, AddressingMode),
     /// Increment X Register
-    Inx(u8),
+    Inx(u8, AddressingMode),
     /// Increment Y Register
-    Iny(u8),
+    Iny(u8, AddressingMode),
     /// Decrement Memory
     Dec(u8, AddressingMode),
     /// Decrement X Register
-    Dex(u8),
+    Dex(u8, AddressingMode),
     /// Decrement Y Register
-    Dey(u8),
+    Dey(u8, AddressingMode),
     /// Arithmetic Shift Left
     Asl(u8, AddressingMode),
     /// Logical Shift Right
@@ -239,6 +246,7 @@ pub enum Opcode {
     Rol(u8, AddressingMode),
     /// Rotate Right
     Ror(u8, AddressingMode),
+    Brk(u8, AddressingMode)
 }
 
 impl Opcode {
@@ -331,39 +339,39 @@ impl Opcode {
             STY_ZERO_PAGE => Some(Opcode::Sty(value, AddressingMode::ZeroPage)),
             STY_ZERO_PAGE_X => Some(Opcode::Sty(value, AddressingMode::ZeroPageX)),
             STY_ABSOLUTE => Some(Opcode::Sty(value, AddressingMode::Absolute)),
-            CLC => Some(Opcode::Clc),
-            CLD => Some(Opcode::Cld),
-            CLI => Some(Opcode::Cli),
-            CLV => Some(Opcode::Clv),
-            SEC => Some(Opcode::Sec),
-            SED => Some(Opcode::Sed),
-            SEI => Some(Opcode::Sei),
-            BCC => Some(Opcode::Bcc(value)),
-            BCS => Some(Opcode::Bcs(value)),
-            BEQ => Some(Opcode::Beq(value)),
-            BMI => Some(Opcode::Bmi(value)),
-            BNE => Some(Opcode::Bne(value)),
-            BPL => Some(Opcode::Bpl(value)),
-            BVC => Some(Opcode::Bvc(value)),
-            BVS => Some(Opcode::Bvs(value)),
-            TAX => Some(Opcode::Tax(value)),
-            TAY => Some(Opcode::Tay(value)),
-            TXA => Some(Opcode::Txa(value)),
-            TYA => Some(Opcode::Tya(value)),
-            TSX => Some(Opcode::Tsx(value)),
-            TXS => Some(Opcode::Txs(value)),
+            CLC => Some(Opcode::Clc(value, AddressingMode::Implicit)),
+            CLD => Some(Opcode::Cld(value, AddressingMode::Implicit)),
+            CLI => Some(Opcode::Cli(value, AddressingMode::Implicit)),
+            CLV => Some(Opcode::Clv(value, AddressingMode::Implicit)),
+            SEC => Some(Opcode::Sec(value, AddressingMode::Implicit)),
+            SED => Some(Opcode::Sed(value, AddressingMode::Implicit)),
+            SEI => Some(Opcode::Sei(value, AddressingMode::Implicit)),
+            BCC => Some(Opcode::Bcc(value, AddressingMode::Relative)),
+            BCS => Some(Opcode::Bcs(value, AddressingMode::Relative)),
+            BEQ => Some(Opcode::Beq(value, AddressingMode::Relative)),
+            BMI => Some(Opcode::Bmi(value, AddressingMode::Relative)),
+            BNE => Some(Opcode::Bne(value, AddressingMode::Relative)),
+            BPL => Some(Opcode::Bpl(value, AddressingMode::Relative)),
+            BVC => Some(Opcode::Bvc(value, AddressingMode::Relative)),
+            BVS => Some(Opcode::Bvs(value, AddressingMode::Relative)),
+            TAX => Some(Opcode::Tax(value, AddressingMode::Implicit)),
+            TAY => Some(Opcode::Tay(value, AddressingMode::Implicit)),
+            TXA => Some(Opcode::Txa(value, AddressingMode::Implicit)),
+            TYA => Some(Opcode::Tya(value, AddressingMode::Implicit)),
+            TSX => Some(Opcode::Tsx(value, AddressingMode::Implicit)),
+            TXS => Some(Opcode::Txs(value, AddressingMode::Implicit)),
             INC_ZERO_PAGE => Some(Opcode::Inc(value, AddressingMode::ZeroPage)),
             INC_ZERO_PAGE_X => Some(Opcode::Inc(value, AddressingMode::ZeroPageX)),
             INC_ABSOLUTE => Some(Opcode::Inc(value, AddressingMode::Absolute)),
             INC_ABSOLUTE_X => Some(Opcode::Inc(value, AddressingMode::AbsoluteX)),
-            INX => Some(Opcode::Inx(value)),
-            INY => Some(Opcode::Iny(value)),
+            INX => Some(Opcode::Inx(value, AddressingMode::Implicit)),
+            INY => Some(Opcode::Iny(value, AddressingMode::Implicit)),
             DEC_ZERO_PAGE => Some(Opcode::Dec(value, AddressingMode::ZeroPage)),
             DEC_ZERO_PAGE_X => Some(Opcode::Dec(value, AddressingMode::ZeroPageX)),
             DEC_ABSOLUTE => Some(Opcode::Dec(value, AddressingMode::Absolute)),
             DEC_ABSOLUTE_X => Some(Opcode::Dec(value, AddressingMode::AbsoluteX)),
-            DEX => Some(Opcode::Dex(value)),
-            DEY => Some(Opcode::Dey(value)),
+            DEX => Some(Opcode::Dex(value, AddressingMode::Implicit)),
+            DEY => Some(Opcode::Dey(value, AddressingMode::Implicit)),
             ASL_ACCUMULATOR => Some(Opcode::Asl(value, AddressingMode::Accumulator)),
             ASL_ZERO_PAGE => Some(Opcode::Asl(value, AddressingMode::ZeroPage)),
             ASL_ZERO_PAGE_X => Some(Opcode::Asl(value, AddressingMode::ZeroPageX)),
@@ -384,6 +392,7 @@ impl Opcode {
             ROR_ZERO_PAGE_X => Some(Opcode::Asl(value, AddressingMode::ZeroPageX)),
             ROR_ABSOLUTE => Some(Opcode::Asl(value, AddressingMode::Absolute)),
             ROR_ABSOLUTE_X => Some(Opcode::Asl(value, AddressingMode::AbsoluteX)),
+            BRK => Some(Opcode::Brk(value, AddressingMode::Implicit)),
             _ => None,
         }
     }
