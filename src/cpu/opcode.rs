@@ -1,3 +1,5 @@
+use std::ops::Add;
+
 use crate::memory::types::AddressingMode;
 
 pub const ADC_IMMEDIATE: u8 = 0x69;
@@ -120,6 +122,26 @@ const DEC_ABSOLUTE: u8 = 0xCE;
 const DEC_ABSOLUTE_X: u8 = 0xDE;
 const DEX: u8 = 0xCA;
 const DEY: u8 = 0x88;
+const ASL_ACCUMULATOR: u8 = 0x0A;
+const ASL_ZERO_PAGE: u8 = 0x06;
+const ASL_ZERO_PAGE_X: u8 = 0x16;
+const ASL_ABSOLUTE: u8 = 0x0E;
+const ASL_ABSOLUTE_X: u8 = 0x1E;
+const LSR_ACCUMULATOR: u8 = 0x4A;
+const LSR_ZERO_PAGE: u8 = 0x46;
+const LSR_ZERO_PAGE_X: u8 = 0x56;
+const LSR_ABSOLUTE: u8 = 0x4E;
+const LSR_ABSOLUTE_X: u8 = 0x5E;
+const ROL_ACCUMULATOR: u8 = 0x2A;
+const ROL_ZERO_PAGE: u8 = 0x26;
+const ROL_ZERO_PAGE_X: u8 = 0x36;
+const ROL_ABSOLUTE: u8 = 0x2E;
+const ROL_ABSOLUTE_X: u8 = 0x3E;
+const ROR_ACCUMULATOR: u8 = 0x6A;
+const ROR_ZERO_PAGE: u8 = 0x66;
+const ROR_ZERO_PAGE_X: u8 = 0x76;
+const ROR_ABSOLUTE: u8 = 0x6E;
+const ROR_ABSOLUTE_X: u8 = 0x7E;
 
 /// Opcodes of instruction set for 6502 processor
 /// see: [6502 docs](http://www.6502.org/tutorials/6502opcodes.html)
@@ -209,6 +231,14 @@ pub enum Opcode {
     Dex(u8),
     /// Decrement Y Register
     Dey(u8),
+    /// Arithmetic Shift Left
+    Asl(u8, AddressingMode),
+    /// Logical Shift Right
+    Lsr(u8, AddressingMode),
+    /// Rotate Left
+    Rol(u8, AddressingMode),
+    /// Rotate Right
+    Ror(u8, AddressingMode),
 }
 
 impl Opcode {
@@ -334,6 +364,26 @@ impl Opcode {
             DEC_ABSOLUTE_X => Some(Opcode::Dec(value, AddressingMode::AbsoluteX)),
             DEX => Some(Opcode::Dex(value)),
             DEY => Some(Opcode::Dey(value)),
+            ASL_ACCUMULATOR => Some(Opcode::Asl(value, AddressingMode::Accumulator)),
+            ASL_ZERO_PAGE => Some(Opcode::Asl(value, AddressingMode::ZeroPage)),
+            ASL_ZERO_PAGE_X => Some(Opcode::Asl(value, AddressingMode::ZeroPageX)),
+            ASL_ABSOLUTE => Some(Opcode::Asl(value, AddressingMode::Absolute)),
+            ASL_ABSOLUTE_X => Some(Opcode::Asl(value, AddressingMode::AbsoluteX)),
+            LSR_ACCUMULATOR => Some(Opcode::Asl(value, AddressingMode::Accumulator)),
+            LSR_ZERO_PAGE => Some(Opcode::Asl(value, AddressingMode::ZeroPage)),
+            LSR_ZERO_PAGE_X => Some(Opcode::Asl(value, AddressingMode::ZeroPageX)),
+            LSR_ABSOLUTE => Some(Opcode::Asl(value, AddressingMode::Absolute)),
+            LSR_ABSOLUTE_X => Some(Opcode::Asl(value, AddressingMode::AbsoluteX)),
+            ROL_ACCUMULATOR => Some(Opcode::Asl(value, AddressingMode::Accumulator)),
+            ROL_ZERO_PAGE => Some(Opcode::Asl(value, AddressingMode::ZeroPage)),
+            ROL_ZERO_PAGE_X => Some(Opcode::Asl(value, AddressingMode::ZeroPageX)),
+            ROL_ABSOLUTE => Some(Opcode::Asl(value, AddressingMode::Absolute)),
+            ROL_ABSOLUTE_X => Some(Opcode::Asl(value, AddressingMode::AbsoluteX)),
+            ROR_ACCUMULATOR => Some(Opcode::Asl(value, AddressingMode::Accumulator)),
+            ROR_ZERO_PAGE => Some(Opcode::Asl(value, AddressingMode::ZeroPage)),
+            ROR_ZERO_PAGE_X => Some(Opcode::Asl(value, AddressingMode::ZeroPageX)),
+            ROR_ABSOLUTE => Some(Opcode::Asl(value, AddressingMode::Absolute)),
+            ROR_ABSOLUTE_X => Some(Opcode::Asl(value, AddressingMode::AbsoluteX)),
             _ => None,
         }
     }
