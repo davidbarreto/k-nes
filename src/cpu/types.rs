@@ -1,8 +1,23 @@
 use bitflags::bitflags;
+use std::fmt;
 
 #[derive(Debug, PartialEq)]
 pub enum InstructionError {
     InvalidOpcode(u8),
+    NotImplementedInstruction(u8),
+}
+
+impl fmt::Display for InstructionError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match *self {
+            InstructionError::InvalidOpcode(opcode) => {
+                write!(f, "Invalid opcode: 0x{:02X}", opcode)
+            }
+            InstructionError::NotImplementedInstruction(opcode) => {
+                write!(f, "Not implemented instruction: 0x{:02X}", opcode)
+            }
+        }
+    }
 }
 
 bitflags! {
