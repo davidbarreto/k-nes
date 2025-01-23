@@ -111,14 +111,14 @@ fn test_store_y_register() {
 fn run_store_test<F, G>(data: u8, address: u8, set_value: F, operation: G)
 where
     F: Fn(&mut Cpu, u8),
-    G: Fn(&mut Cpu, u8)
+    G: Fn(&mut Cpu, u16)
 {
     // Given
     let mut cpu = Cpu::new();
     set_value(&mut cpu, data);
 
     // When
-    operation(&mut cpu, address);
+    operation(&mut cpu, address as u16);
 
     // Then
     assert_eq!(cpu.memory.read(address as u16), data);

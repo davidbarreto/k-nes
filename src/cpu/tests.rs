@@ -286,14 +286,9 @@ fn test_example_program() {
     // $0604    69 c4     ADC #$c4
     // $0606    00        BRK 
     let program: [u8; 7] = [0xA9, 0xC0, 0xAA, 0xE8, 0x69, 0xC4, 0x00];
-    let program_address: u16 = 0x0600;
-    let mut cpu = Cpu::new();
+    let cpu = execute_program(&program);
 
-    // Load program into memory, starting at 'program_address'
-    cpu.memory.write_array(&program, program_address);
-    cpu.registers.program_counter = program_address;
-    cpu.execute_program();
-
+    assert_eq!(cpu.registers.program_counter, 0x0607);
     assert_eq!(cpu.registers.accumulator, 0x84);
     assert_eq!(cpu.registers.x_register, 0xC1);
 }
@@ -313,7 +308,30 @@ fn test_example_program_2() {
     // $0608    d0 f8     BNE $0602
     // $060a    8e 01 02  STX $0201
     // $060d    00        BRK
-    assert!(true);
+    let program: [u8; 14] = [0xA2, 0x08, 0xCA, 0x8E, 0x00, 0x02, 0xE0, 0x03, 0xD0, 0xF8, 0x8E, 0x01, 0x02, 0x00];
+    let cpu = execute_program(&program);
+
+    assert_eq!(cpu.registers.program_counter, 0x060E);
+    assert_eq!(cpu.registers.accumulator, 0x00);
+    assert_eq!(cpu.registers.x_register, 0x03);
+    assert_eq!(cpu.memory.read(0x0000), 0x00);
+    assert_eq!(cpu.memory.read(0x0200), 0x03);
+    assert_eq!(cpu.memory.read(0x0201), 0x03);
+}
+
+fn execute_program(program: &[u8]) -> Cpu {
+    let program_address: u16 = 0x0600;
+    let mut cpu = Cpu::new();
+
+    // Load program into memory, starting at 'program_address'
+    cpu.memory.write_array(&program, program_address);
+    cpu.registers.program_counter = program_address;
+    
+    if let Err(e) = cpu.execute_program() {
+        println!("Got error: {}", e);
+        panic!();
+    }
+    cpu
 }
 
 // TODO Add tests for other addressing modes
