@@ -12,6 +12,8 @@ use instruction_set::load_store::LoadStore;
 use instruction_set::register_transfers::RegisterTransfers;
 use instruction_set::increments_decrements::IncrementsDecrements;
 use instruction_set::branches::Branches;
+use instruction_set::logical::Logical;
+use instruction_set::jumps_calls::JumpsCalls;
 
 use register_bank::RegisterBank;
 use opcode::Opcode;
@@ -68,6 +70,11 @@ impl Cpu {
                     self.adc(data);
                     current_addressing_mode = addressing_mode;
                 },
+                Opcode::Eor(_, addressing_mode) => {
+                    let data: u8 = self.memory.read(self.calculate_address(addressing_mode));
+                    self.eor(data);
+                    current_addressing_mode = addressing_mode;
+                },
                 Opcode::Lda(_, addressing_mode) => {
                     let data: u8 = self.memory.read(self.calculate_address(addressing_mode));
                     self.lda(data);
@@ -78,6 +85,11 @@ impl Cpu {
                     self.ldx(data);
                     current_addressing_mode = addressing_mode;
                 },
+                Opcode::Ldy(_, addressing_mode) => {
+                    let data: u8 = self.memory.read(self.calculate_address(addressing_mode));
+                    self.ldy(data);
+                    current_addressing_mode = addressing_mode;
+                }
                 Opcode::Dex(_, addressing_mode) => {
                     self.dex();
                     current_addressing_mode = addressing_mode;
@@ -86,8 +98,21 @@ impl Cpu {
                     self.tax();
                     current_addressing_mode = addressing_mode;
                 },
+                Opcode::Tay(_, addressing_mode) => {
+                    self.tay();
+                    current_addressing_mode = addressing_mode;
+                },
+                Opcode::Tya(_, addressing_mode) => {
+                    self.tya();
+                    current_addressing_mode = addressing_mode;
+                }
                 Opcode::Inx(_, addressing_mode) => {
                     self.inx();
+                    current_addressing_mode = addressing_mode;
+                },
+                Opcode::Sta(_, addressing_mode) => {
+                    let data: u16 = self.calculate_address(addressing_mode);
+                    self.sta(data);
                     current_addressing_mode = addressing_mode;
                 },
                 Opcode::Stx(_, addressing_mode) => {
@@ -100,20 +125,53 @@ impl Cpu {
                     self.cpx(data);
                     current_addressing_mode = addressing_mode;
                 },
-                Opcode::Bne(_, addressing_mode) => {
+                Opcode::Cpy(_, addressing_mode) => {
                     let data: u8 = self.memory.read(self.calculate_address(addressing_mode));
-                    self.bne(data);
+                    self.cpy(data);
                     current_addressing_mode = addressing_mode;
+                }
+                Opcode::Bcs(_, addressing_mode) => {
+                    let address: u8 = self.memory.read(self.calculate_address(addressing_mode));
+                    self.bcs(address);
+                    current_addressing_mode = addressing_mode;
+                },
+                Opcode::Bne(_, addressing_mode) => {
+                    let address: u8 = self.memory.read(self.calculate_address(addressing_mode));
+                    self.bne(address);
+                    current_addressing_mode = addressing_mode;
+                },
+                Opcode::Jmp(_, addressing_mode) => {
+                    let address: u16 = self.calculate_address(addressing_mode);
+                    self.jmp(address);
+                    current_addressing_mode = addressing_mode;
+                },
+                Opcode::Jsr(_, addressing_mode) => {
+                    let address: u16 = self.calculate_address(addressing_mode);
+                    self.jsr(address, addressing_mode.byte_size());
+                    current_addressing_mode = addressing_mode;
+                },
+                Opcode::Rts(_, addressing_mode) => {
+                    self.rts();
+                    current_addressing_mode = addressing_mode;
+                    // According to specs, we are supposed to save next instruction - 1,
+                    // to PC. In order adjust PC this program logic, we have to increment it
+                    // so it will point to next instruction.
+                    self.registers.program_counter += 1;
                 },
                 _ => {
                     return Err(InstructionError::NotImplementedInstruction(op));
                 },
             }
+
+            // Jump instructions will set PC direct to next instruction address
+            // So, no need to increment PC in these cases
+            if !opcode.is_jump_instruction() {
+                self.registers.program_counter += current_addressing_mode.byte_size() as u16 - 1;
+            }
         } else {
             return Err(InstructionError::InvalidOpcode(op));
         }
 
-        self.registers.program_counter += current_addressing_mode.byte_size() as u16 - 1;
         Ok(())
     }
 
