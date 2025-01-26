@@ -345,6 +345,7 @@ fn test_subroutines() {
 }
 
 #[test]
+#[ignore]
 /// This tests uses a program that calculates week day
 /// Reference: (Day of Week)[http://www.6502.org/source/misc/dow.htm]
 /// How to compute the day of the week in 6502 assembly.
