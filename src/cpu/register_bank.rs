@@ -1,5 +1,7 @@
 use super::types::CpuFlags;
 
+pub const STACK_POINTER_BASE_ADDRESS: u16 = 0x0100;
+
 pub struct RegisterBank {
     pub status: CpuFlags,
     pub program_counter: u16,
@@ -14,7 +16,7 @@ impl RegisterBank {
         Self {
             status: CpuFlags::empty(),
             program_counter: 0,
-            stack_pointer: 0,
+            stack_pointer: 0xFF,
             accumulator: 0,
             x_register: 0,
             y_register: 0,
