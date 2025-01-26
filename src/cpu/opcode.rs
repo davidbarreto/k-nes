@@ -141,6 +141,10 @@ const ROR_ZERO_PAGE: u8 = 0x66;
 const ROR_ZERO_PAGE_X: u8 = 0x76;
 const ROR_ABSOLUTE: u8 = 0x6E;
 const ROR_ABSOLUTE_X: u8 = 0x7E;
+const JMP_ABSOLUTE: u8 = 0x4C;
+const JMP_INDIRECT: u8 = 0x6C;
+const JSR_ABSOLUTE: u8 = 0x20;
+const RTS: u8 = 0x60;
 
 /// Opcodes of instruction set for 6502 processor
 ///
@@ -246,6 +250,13 @@ pub enum Opcode {
     Rol(u8, AddressingMode),
     /// Rotate Right
     Ror(u8, AddressingMode),
+    /// Jump to another location
+    Jmp(u8, AddressingMode),
+    /// Jump to Subroutine
+    Jsr(u8, AddressingMode),
+    /// Return from Subroutine
+    Rts(u8, AddressingMode),
+    /// Break
     Brk(u8, AddressingMode)
 }
 
@@ -392,8 +403,19 @@ impl Opcode {
             ROR_ZERO_PAGE_X => Some(Opcode::Asl(value, AddressingMode::ZeroPageX)),
             ROR_ABSOLUTE => Some(Opcode::Asl(value, AddressingMode::Absolute)),
             ROR_ABSOLUTE_X => Some(Opcode::Asl(value, AddressingMode::AbsoluteX)),
+            JMP_ABSOLUTE => Some(Opcode::Jmp(value, AddressingMode::Absolute)),
+            JMP_INDIRECT => Some(Opcode::Jmp(value, AddressingMode::Indirect)),
+            JSR_ABSOLUTE => Some(Opcode::Jsr(value, AddressingMode::Absolute)),
+            RTS => Some(Opcode::Rts(value, AddressingMode::Implicit)),
             BRK => Some(Opcode::Brk(value, AddressingMode::Implicit)),
             _ => None,
+        }
+    }
+
+    pub fn is_jump_instruction(&self) -> bool {
+        match self {
+            Opcode::Jmp(_, _) | Opcode::Jsr(_, _) => true,
+            _ => false
         }
     }
 }
