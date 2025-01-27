@@ -14,6 +14,8 @@ use instruction_set::increments_decrements::IncrementsDecrements;
 use instruction_set::branches::Branches;
 use instruction_set::logical::Logical;
 use instruction_set::jumps_calls::JumpsCalls;
+use instruction_set::shifts::Shifts;
+use instruction_set::status_flag_change::StatusFlagChange;
 
 use register_bank::RegisterBank;
 use opcode::Opcode;
@@ -70,9 +72,23 @@ impl Cpu {
                     self.adc(data);
                     current_addressing_mode = addressing_mode;
                 },
+                Opcode::Sbc(_, addressing_mode) => {
+                    let data: u8 = self.memory.read(self.calculate_address(addressing_mode));
+                    self.sbc(data);
+                    current_addressing_mode = addressing_mode;
+                },
                 Opcode::Eor(_, addressing_mode) => {
                     let data: u8 = self.memory.read(self.calculate_address(addressing_mode));
                     self.eor(data);
+                    current_addressing_mode = addressing_mode;
+                },
+                Opcode::Lsr(_, addressing_mode) => {
+                    if addressing_mode == AddressingMode::Accumulator {
+                        self.lsr_accumulator();    
+                    } else {
+                        let address: u16 = self.calculate_address(addressing_mode);
+                        self.lsr(address);
+                    }
                     current_addressing_mode = addressing_mode;
                 },
                 Opcode::Lda(_, addressing_mode) => {
@@ -110,6 +126,10 @@ impl Cpu {
                     self.inx();
                     current_addressing_mode = addressing_mode;
                 },
+                Opcode::Dey(_, addressing_mode) => {
+                    self.dey();
+                    current_addressing_mode = addressing_mode;
+                },
                 Opcode::Sta(_, addressing_mode) => {
                     let data: u16 = self.calculate_address(addressing_mode);
                     self.sta(data);
@@ -129,10 +149,20 @@ impl Cpu {
                     let data: u8 = self.memory.read(self.calculate_address(addressing_mode));
                     self.cpy(data);
                     current_addressing_mode = addressing_mode;
-                }
+                },
+                Opcode::Cmp(_, addressing_mode) => {
+                    let data: u8 = self.memory.read(self.calculate_address(addressing_mode));
+                    self.cmp(data);
+                    current_addressing_mode = addressing_mode;
+                },
                 Opcode::Bcs(_, addressing_mode) => {
                     let address: u8 = self.memory.read(self.calculate_address(addressing_mode));
                     self.bcs(address);
+                    current_addressing_mode = addressing_mode;
+                },
+                Opcode::Bcc(_, addressing_mode) => {
+                    let address: u8 = self.memory.read(self.calculate_address(addressing_mode));
+                    self.bcc(address);
                     current_addressing_mode = addressing_mode;
                 },
                 Opcode::Bne(_, addressing_mode) => {
@@ -157,6 +187,10 @@ impl Cpu {
                     // to PC. In order adjust PC this program logic, we have to increment it
                     // so it will point to next instruction.
                     self.registers.program_counter += 1;
+                },
+                Opcode::Clc(_, addressing_mode) => {
+                    self.clc();
+                    current_addressing_mode = addressing_mode;
                 },
                 _ => {
                     return Err(InstructionError::NotImplementedInstruction(op));
