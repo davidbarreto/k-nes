@@ -389,11 +389,11 @@ fn test_ror_accumulator_flag_zero() {
         CpuFlags::ZERO);
 }
 
-fn test_shift<F, G, H>(initial_value: u8, address: u8, expected_value: u8, initial_status: CpuFlags, set_value: F, get_value: G, operation: H, expected_status: CpuFlags) 
+fn test_shift<F, G, H>(initial_value: u8, address: u16, expected_value: u8, initial_status: CpuFlags, set_value: F, get_value: G, operation: H, expected_status: CpuFlags) 
 where 
-    F: Fn(&mut Cpu, u8, u8),
-    G: Fn(&mut Cpu, u8) -> u8,
-    H: Fn(&mut Cpu, u8)
+    F: Fn(&mut Cpu, u8, u16),
+    G: Fn(&mut Cpu, u16) -> u8,
+    H: Fn(&mut Cpu, u16)
 {
     // Given
     let mut cpu = Cpu::new();
