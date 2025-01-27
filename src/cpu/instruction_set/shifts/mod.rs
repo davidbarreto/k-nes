@@ -2,22 +2,22 @@ use crate::cpu::types::CpuFlags;
 use crate::cpu::Cpu;
 
 pub trait Shifts {
-    fn asl(&mut self, address: u8);
+    fn asl(&mut self, address: u16);
     fn asl_accumulator(&mut self);
-    fn lsr(&mut self, address: u8);
+    fn lsr(&mut self, address: u16);
     fn lsr_accumulator(&mut self);
-    fn rol(&mut self, address: u8);
+    fn rol(&mut self, address: u16);
     fn rol_accumulator(&mut self);
-    fn ror(&mut self, address: u8);
+    fn ror(&mut self, address: u16);
     fn ror_accumulator(&mut self);
 }
 
 impl Shifts for Cpu {
-    fn asl(&mut self, address: u8) {
-        let val = self.memory.read(address as u16);
+    fn asl(&mut self, address: u16) {
+        let val = self.memory.read(address);
         let has_carry = val & 0x80 != 0;
         let result = val << 1;
-        self.memory.write(result, address as u16);
+        self.memory.write(result, address);
         update_flags(result, has_carry, self);
     }
 
@@ -28,11 +28,11 @@ impl Shifts for Cpu {
         update_flags(result, has_carry, self);
     }
 
-    fn lsr(&mut self, address: u8) {
-        let val = self.memory.read(address as u16);
+    fn lsr(&mut self, address: u16) {
+        let val = self.memory.read(address);
         let has_carry = val & 0x01 != 0;
         let result = val >> 1;
-        self.memory.write(result, address as u16);
+        self.memory.write(result, address);
         update_flags(result, has_carry, self);
     }
 
@@ -43,12 +43,12 @@ impl Shifts for Cpu {
         update_flags(result, has_carry, self);
     }
 
-    fn rol(&mut self, address: u8) {
-        let val = self.memory.read(address as u16);
+    fn rol(&mut self, address: u16) {
+        let val = self.memory.read(address);
         let has_carry = val & 0x80 != 0;
         let shifted = val << 1;
         let result = if self.registers.status.contains(CpuFlags::CARRY) { shifted | 0x01 } else { shifted };
-        self.memory.write(result, address as u16);
+        self.memory.write(result, address);
         update_flags(result, has_carry, self);
     }
 
@@ -60,12 +60,12 @@ impl Shifts for Cpu {
         update_flags(result, has_carry, self);
     }
 
-    fn ror(&mut self, address: u8) {
-        let val = self.memory.read(address as u16);
+    fn ror(&mut self, address: u16) {
+        let val = self.memory.read(address);
         let has_carry = val & 0x01 != 0;
         let shifted = val >> 1;
         let result = if self.registers.status.contains(CpuFlags::CARRY) { shifted | 0x80 } else { shifted };
-        self.memory.write(result, address as u16);
+        self.memory.write(result, address);
         update_flags(result, has_carry, self);
     }
 
