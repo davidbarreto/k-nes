@@ -275,7 +275,20 @@ fn execute_adc_indirect_y_with_high_y_value() {
 }
 
 #[test]
-fn test_example_program() {
+fn test_easy_6502_our_first_program() {
+
+    // Address  Hexdump   Dissassembly
+    // -------------------------------
+    // $0600    a9 01     LDA #$01
+    // $0602    8d 00 02  STA $0200
+    // $0605    a9 05     LDA #$05
+    // $0607    8d 01 02  STA $0201
+    // $060a    a9 08     LDA #$08
+    // $060c    8d 02 02  STA $0202
+}
+
+#[test]
+fn test_easy_6502_instructions() {
     
     // Program test:
     // Address  Hexdump   Dissassembly
@@ -294,7 +307,23 @@ fn test_example_program() {
 }
 
 #[test]
-fn test_example_program_2() {
+fn test_easy_6502_instructions_2() {
+    
+    // Address  Hexdump   Dissassembly
+    // -------------------------------
+    // $0600    a9 80     LDA #$80
+    // $0602    85 01     STA $01
+    // $0604    65 01     ADC $01
+    let program: [u8; 7] = [0xA9, 0xC0, 0xAA, 0xE8, 0x69, 0xC4, 0x00];
+    let cpu = execute_program(&program);
+
+    assert_eq!(cpu.registers.program_counter, 0x0607);
+    assert_eq!(cpu.registers.accumulator, 0x84);
+    assert_eq!(cpu.registers.x_register, 0xC1);
+}
+
+#[test]
+fn test_easy_6502_branching() {
     
     // Program test:
     // Address  Hexdump   Dissassembly
@@ -318,7 +347,75 @@ fn test_example_program_2() {
 }
 
 #[test]
-fn test_subroutines() {
+fn test_easy_6502_addressing_modes_relative() {
+    // Address  Hexdump   Dissassembly
+    // -------------------------------
+    // $0600    a9 01     LDA #$01
+    // $0602    c9 02     CMP #$02
+    // $0604    d0 02     BNE $0608
+    // $0606    85 22     STA $22
+    // $0608    00        BRK 
+}
+
+#[test]
+fn test_easy_6502_addressing_modes_indirect() {
+    // Address  Hexdump   Dissassembly
+    // -------------------------------
+    // $0600    a9 01     LDA #$01
+    // $0602    85 f0     STA $f0
+    // $0604    a9 cc     LDA #$cc
+    // $0606    85 f1     STA $f1
+    // $0608    6c f0 00  JMP ($00f0)
+}
+
+#[test]
+fn test_easy_6502_addressing_modes_indexed_indirect() {
+    // Address  Hexdump   Dissassembly
+    // -------------------------------
+    // $0600    a2 01     LDX #$01
+    // $0602    a9 05     LDA #$05
+    // $0604    85 01     STA $01
+    // $0606    a9 07     LDA #$07
+    // $0608    85 02     STA $02
+    // $060a    a0 0a     LDY #$0a
+    // $060c    8c 05 07  STY $0705
+    // $060f    a1 00     LDA ($00,X)
+}
+
+#[test]
+fn test_easy_6502_the_stack() {
+    // Address  Hexdump   Dissassembly
+    // -------------------------------
+    // $0600    a2 00     LDX #$00
+    // $0602    a0 00     LDY #$00
+    // $0604    8a        TXA 
+    // $0605    99 00 02  STA $0200,Y
+    // $0608    48        PHA 
+    // $0609    e8        INX 
+    // $060a    c8        INY 
+    // $060b    c0 10     CPY #$10
+    // $060d    d0 f5     BNE $0604
+    // $060f    68        PLA 
+    // $0610    99 00 02  STA $0200,Y
+    // $0613    c8        INY 
+    // $0614    c0 20     CPY #$20
+    // $0616    d0 f7     BNE $060f
+}
+
+#[test]
+fn test_easy_6502_jumping_jmp() {
+    // Address  Hexdump   Dissassembly
+    // -------------------------------
+    // $0600    a9 03     LDA #$03
+    // $0602    4c 08 06  JMP $0608
+    // $0605    00        BRK 
+    // $0606    00        BRK 
+    // $0607    00        BRK 
+    // $0608    8d 00 02  STA $0200
+}
+
+#[test]
+fn test_easy_6502_jumping_jsr_rts() {
     // Address  Hexdump   Dissassembly
     // -------------------------------
     // $0600    20 09 06  JSR $0609
@@ -439,7 +536,7 @@ fn test_day_of_week() {
         0x75, 0x20,       // ADC MTAB-1,X
         0x85, 0x06,       // STA $06
         0x98,             // TYA
-        0x20, 0x26, 0x06, // JSR MOD7
+        0x20, 0x56, 0x06, // JSR MOD7
         0xE5, 0x06,       // SBC $06
         0x85, 0x06,       // STA $06
         0x98,             // TYA
@@ -451,14 +548,16 @@ fn test_day_of_week() {
 
         // MOD7 Subroutine
         0x69, 0x07,       // ADC #$07 - MOD7
-        0x90, 0xFD,       // BCC MOD7
+        0x90, 0xFB,       // BCC MOD7
         0x60              // RTS
     ];
 
     let cpu = execute_program(&program);
 
-    assert_eq!(cpu.registers.program_counter, 0x060E);
-    assert_eq!(cpu.registers.accumulator, 0x04); // Answer should be Thursday
+    assert_eq!(cpu.registers.program_counter, 0x0668);
+    assert_eq!(cpu.registers.accumulator, 0xCE); // Answer should be Thursday
+    assert_eq!(cpu.registers.x_register, 0x00);
+    assert_eq!(cpu.registers.y_register, 0x00);
 
 }
 
