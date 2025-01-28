@@ -8,12 +8,12 @@ use crate::memory::Memory;
 use crate::memory::types::AddressingMode;
 
 use instruction_set::arithmetic::Arithmetic;
-use instruction_set::load_store::LoadStore;
-use instruction_set::register_transfers::RegisterTransfers;
-use instruction_set::increments_decrements::IncrementsDecrements;
 use instruction_set::branches::Branches;
-use instruction_set::logical::Logical;
+use instruction_set::increments_decrements::IncrementsDecrements;
 use instruction_set::jumps_calls::JumpsCalls;
+use instruction_set::load_store::LoadStore;
+use instruction_set::logical::Logical;
+use instruction_set::register_transfers::RegisterTransfers;
 use instruction_set::shifts::Shifts;
 use instruction_set::status_flag_change::StatusFlagChange;
 
@@ -23,24 +23,21 @@ use types::InstructionError;
 
 pub struct Cpu {
     registers: RegisterBank,
-    memory: Memory,
-    cycles: u64,
+    memory: Memory
 }
 
 impl Cpu {
     pub fn new() -> Self {
         Self {
             registers: RegisterBank::new(),
-            memory: Memory::new(),
-            cycles: 0,
+            memory: Memory::new()
         }
     }
 
-    pub fn new_with_parameters(memory: Memory, registers: RegisterBank, cycles: u64) -> Self {
+    pub fn new_with_parameters(memory: Memory, registers: RegisterBank) -> Self {
         Self {
             registers,
-            memory,
-            cycles,
+            memory
         }
     }
 
@@ -67,6 +64,7 @@ impl Cpu {
             self.registers.program_counter += 1;
 
             match opcode {
+                // Arithmetic
                 Opcode::Adc(_, addressing_mode) => {
                     let data: u8 = self.memory.read(self.calculate_address(addressing_mode));
                     self.adc(data);
@@ -77,67 +75,9 @@ impl Cpu {
                     self.sbc(data);
                     current_addressing_mode = addressing_mode;
                 },
-                Opcode::Eor(_, addressing_mode) => {
+                Opcode::Cmp(_, addressing_mode) => {
                     let data: u8 = self.memory.read(self.calculate_address(addressing_mode));
-                    self.eor(data);
-                    current_addressing_mode = addressing_mode;
-                },
-                Opcode::Lsr(_, addressing_mode) => {
-                    if addressing_mode == AddressingMode::Accumulator {
-                        self.lsr_accumulator();    
-                    } else {
-                        let address: u16 = self.calculate_address(addressing_mode);
-                        self.lsr(address);
-                    }
-                    current_addressing_mode = addressing_mode;
-                },
-                Opcode::Lda(_, addressing_mode) => {
-                    let data: u8 = self.memory.read(self.calculate_address(addressing_mode));
-                    self.lda(data);
-                    current_addressing_mode = addressing_mode;
-                },
-                Opcode::Ldx(_, addressing_mode) => {
-                    let data: u8 = self.memory.read(self.calculate_address(addressing_mode));
-                    self.ldx(data);
-                    current_addressing_mode = addressing_mode;
-                },
-                Opcode::Ldy(_, addressing_mode) => {
-                    let data: u8 = self.memory.read(self.calculate_address(addressing_mode));
-                    self.ldy(data);
-                    current_addressing_mode = addressing_mode;
-                }
-                Opcode::Dex(_, addressing_mode) => {
-                    self.dex();
-                    current_addressing_mode = addressing_mode;
-                },
-                Opcode::Tax(_, addressing_mode) => {
-                    self.tax();
-                    current_addressing_mode = addressing_mode;
-                },
-                Opcode::Tay(_, addressing_mode) => {
-                    self.tay();
-                    current_addressing_mode = addressing_mode;
-                },
-                Opcode::Tya(_, addressing_mode) => {
-                    self.tya();
-                    current_addressing_mode = addressing_mode;
-                }
-                Opcode::Inx(_, addressing_mode) => {
-                    self.inx();
-                    current_addressing_mode = addressing_mode;
-                },
-                Opcode::Dey(_, addressing_mode) => {
-                    self.dey();
-                    current_addressing_mode = addressing_mode;
-                },
-                Opcode::Sta(_, addressing_mode) => {
-                    let data: u16 = self.calculate_address(addressing_mode);
-                    self.sta(data);
-                    current_addressing_mode = addressing_mode;
-                },
-                Opcode::Stx(_, addressing_mode) => {
-                    let data: u16 = self.calculate_address(addressing_mode);
-                    self.stx(data);
+                    self.cmp(data);
                     current_addressing_mode = addressing_mode;
                 },
                 Opcode::Cpx(_, addressing_mode) => {
@@ -150,9 +90,10 @@ impl Cpu {
                     self.cpy(data);
                     current_addressing_mode = addressing_mode;
                 },
-                Opcode::Cmp(_, addressing_mode) => {
-                    let data: u8 = self.memory.read(self.calculate_address(addressing_mode));
-                    self.cmp(data);
+                // Branches
+                Opcode::Bcc(_, addressing_mode) => {
+                    let address: u8 = self.memory.read(self.calculate_address(addressing_mode));
+                    self.bcc(address);
                     current_addressing_mode = addressing_mode;
                 },
                 Opcode::Bcs(_, addressing_mode) => {
@@ -160,9 +101,14 @@ impl Cpu {
                     self.bcs(address);
                     current_addressing_mode = addressing_mode;
                 },
-                Opcode::Bcc(_, addressing_mode) => {
+                Opcode::Beq(_, addressing_mode) => {
                     let address: u8 = self.memory.read(self.calculate_address(addressing_mode));
-                    self.bcc(address);
+                    self.beq(address);
+                    current_addressing_mode = addressing_mode;
+                },
+                Opcode::Bmi(_, addressing_mode) => {
+                    let address: u8 = self.memory.read(self.calculate_address(addressing_mode));
+                    self.bmi(address);
                     current_addressing_mode = addressing_mode;
                 },
                 Opcode::Bne(_, addressing_mode) => {
@@ -170,6 +116,49 @@ impl Cpu {
                     self.bne(address);
                     current_addressing_mode = addressing_mode;
                 },
+                Opcode::Bpl(_, addressing_mode) => {
+                    let address: u8 = self.memory.read(self.calculate_address(addressing_mode));
+                    self.bpl(address);
+                    current_addressing_mode = addressing_mode;
+                },
+                Opcode::Bvc(_, addressing_mode) => {
+                    let address: u8 = self.memory.read(self.calculate_address(addressing_mode));
+                    self.bvc(address);
+                    current_addressing_mode = addressing_mode;
+                },
+                Opcode::Bvs(_, addressing_mode) => {
+                    let address: u8 = self.memory.read(self.calculate_address(addressing_mode));
+                    self.bvs(address);
+                    current_addressing_mode = addressing_mode;
+                },
+                // IncrementsDecrements
+                Opcode::Inc(_, addressing_mode) => {
+                    let address: u16 = self.calculate_address(addressing_mode);
+                    self.inc(address);
+                    current_addressing_mode = addressing_mode;
+                },
+                Opcode::Inx(_, addressing_mode) => {
+                    self.inx();
+                    current_addressing_mode = addressing_mode;
+                },
+                Opcode::Iny(_, addressing_mode) => {
+                    self.iny();
+                    current_addressing_mode = addressing_mode;
+                },
+                Opcode::Dec(_, addressing_mode) => {
+                    let address: u16 = self.calculate_address(addressing_mode);
+                    self.dec(address);
+                    current_addressing_mode = addressing_mode;
+                },
+                Opcode::Dex(_, addressing_mode) => {
+                    self.dex();
+                    current_addressing_mode = addressing_mode;
+                },
+                Opcode::Dey(_, addressing_mode) => {
+                    self.dey();
+                    current_addressing_mode = addressing_mode;
+                },
+                // JumpsCalls
                 Opcode::Jmp(_, addressing_mode) => {
                     let address: u16 = self.calculate_address(addressing_mode);
                     self.jmp(address);
@@ -188,8 +177,147 @@ impl Cpu {
                     // so it will point to next instruction.
                     self.registers.program_counter += 1;
                 },
+                // LoadStore
+                Opcode::Lda(_, addressing_mode) => {
+                    let data: u8 = self.memory.read(self.calculate_address(addressing_mode));
+                    self.lda(data);
+                    current_addressing_mode = addressing_mode;
+                },
+                Opcode::Ldx(_, addressing_mode) => {
+                    let data: u8 = self.memory.read(self.calculate_address(addressing_mode));
+                    self.ldx(data);
+                    current_addressing_mode = addressing_mode;
+                },
+                Opcode::Ldy(_, addressing_mode) => {
+                    let data: u8 = self.memory.read(self.calculate_address(addressing_mode));
+                    self.ldy(data);
+                    current_addressing_mode = addressing_mode;
+                },
+                Opcode::Sta(_, addressing_mode) => {
+                    let data: u16 = self.calculate_address(addressing_mode);
+                    self.sta(data);
+                    current_addressing_mode = addressing_mode;
+                },
+                Opcode::Stx(_, addressing_mode) => {
+                    let data: u16 = self.calculate_address(addressing_mode);
+                    self.stx(data);
+                    current_addressing_mode = addressing_mode;
+                },
+                Opcode::Sty(_, addressing_mode) => {
+                    let data: u16 = self.calculate_address(addressing_mode);
+                    self.sty(data);
+                    current_addressing_mode = addressing_mode;
+                },
+                // Logical
+                Opcode::And(_, addressing_mode) => {
+                    let data: u8 = self.memory.read(self.calculate_address(addressing_mode));
+                    self.and(data);
+                    current_addressing_mode = addressing_mode;
+                },
+                Opcode::Ora(_, addressing_mode) => {
+                    let data: u8 = self.memory.read(self.calculate_address(addressing_mode));
+                    self.ora(data);
+                    current_addressing_mode = addressing_mode;
+                },
+                Opcode::Eor(_, addressing_mode) => {
+                    let data: u8 = self.memory.read(self.calculate_address(addressing_mode));
+                    self.eor(data);
+                    current_addressing_mode = addressing_mode;
+                },
+                Opcode::Bit(_, addressing_mode) => {
+                    let data: u8 = self.memory.read(self.calculate_address(addressing_mode));
+                    self.bit(data);
+                    current_addressing_mode = addressing_mode;
+                },
+                // RegisterTransfers
+                Opcode::Tax(_, addressing_mode) => {
+                    self.tax();
+                    current_addressing_mode = addressing_mode;
+                },
+                Opcode::Tay(_, addressing_mode) => {
+                    self.tay();
+                    current_addressing_mode = addressing_mode;
+                },
+                Opcode::Txa(_, addressing_mode) => {
+                    self.txa();
+                    current_addressing_mode = addressing_mode;
+                }
+                Opcode::Tya(_, addressing_mode) => {
+                    self.tya();
+                    current_addressing_mode = addressing_mode;
+                },
+                Opcode::Tsx(_, addressing_mode) => {
+                    self.tsx();
+                    current_addressing_mode = addressing_mode;
+                },
+                Opcode::Txs(_, addressing_mode) => {
+                    self.txs();
+                    current_addressing_mode = addressing_mode;
+                }
+                // Shifts
+                Opcode::Asl(_, addressing_mode) => {
+                    if addressing_mode == AddressingMode::Accumulator {
+                        self.asl_accumulator();    
+                    } else {
+                        let address: u16 = self.calculate_address(addressing_mode);
+                        self.asl(address);
+                    }
+                    current_addressing_mode = addressing_mode;
+                },
+                Opcode::Lsr(_, addressing_mode) => {
+                    if addressing_mode == AddressingMode::Accumulator {
+                        self.lsr_accumulator();    
+                    } else {
+                        let address: u16 = self.calculate_address(addressing_mode);
+                        self.lsr(address);
+                    }
+                    current_addressing_mode = addressing_mode;
+                },
+                Opcode::Rol(_, addressing_mode) => {
+                    if addressing_mode == AddressingMode::Accumulator {
+                        self.rol_accumulator();    
+                    } else {
+                        let address: u16 = self.calculate_address(addressing_mode);
+                        self.rol(address);
+                    }
+                    current_addressing_mode = addressing_mode;
+                },
+                Opcode::Ror(_, addressing_mode) => {
+                    if addressing_mode == AddressingMode::Accumulator {
+                        self.ror_accumulator();    
+                    } else {
+                        let address: u16 = self.calculate_address(addressing_mode);
+                        self.ror(address);
+                    }
+                    current_addressing_mode = addressing_mode;
+                },
+                // StatusFlagChange
                 Opcode::Clc(_, addressing_mode) => {
                     self.clc();
+                    current_addressing_mode = addressing_mode;
+                },
+                Opcode::Cld(_, addressing_mode) => {
+                    self.cld();
+                    current_addressing_mode = addressing_mode;
+                },
+                Opcode::Cli(_, addressing_mode) => {
+                    self.cli();
+                    current_addressing_mode = addressing_mode;
+                },
+                Opcode::Clv(_, addressing_mode) => {
+                    self.clv();
+                    current_addressing_mode = addressing_mode;
+                },
+                Opcode::Sec(_, addressing_mode) => {
+                    self.sec();
+                    current_addressing_mode = addressing_mode;
+                },
+                Opcode::Sed(_, addressing_mode) => {
+                    self.sed();
+                    current_addressing_mode = addressing_mode;
+                },
+                Opcode::Sei(_, addressing_mode) => {
+                    self.sei();
                     current_addressing_mode = addressing_mode;
                 },
                 _ => {
