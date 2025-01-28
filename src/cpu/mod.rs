@@ -15,6 +15,7 @@ use instruction_set::load_store::LoadStore;
 use instruction_set::logical::Logical;
 use instruction_set::register_transfers::RegisterTransfers;
 use instruction_set::shifts::Shifts;
+use instruction_set::stack_operations::StackOperations;
 use instruction_set::status_flag_change::StatusFlagChange;
 
 use register_bank::RegisterBank;
@@ -253,7 +254,7 @@ impl Cpu {
                 Opcode::Txs(_, addressing_mode) => {
                     self.txs();
                     current_addressing_mode = addressing_mode;
-                }
+                },
                 // Shifts
                 Opcode::Asl(_, addressing_mode) => {
                     if addressing_mode == AddressingMode::Accumulator {
@@ -291,6 +292,23 @@ impl Cpu {
                     }
                     current_addressing_mode = addressing_mode;
                 },
+                // Stack Operations
+                Opcode::Pha(_, addressing_mode) => {
+                    self.pha();
+                    current_addressing_mode = addressing_mode;
+                },
+                Opcode::Php(_, addressing_mode) => {
+                    self.php();
+                    current_addressing_mode = addressing_mode;
+                },
+                Opcode::Pla(_, addressing_mode) => {
+                    self.pla();
+                    current_addressing_mode = addressing_mode;
+                },
+                Opcode::Plp(_, addressing_mode) => {
+                    self.plp();
+                    current_addressing_mode = addressing_mode;
+                },
                 // StatusFlagChange
                 Opcode::Clc(_, addressing_mode) => {
                     self.clc();
@@ -320,6 +338,11 @@ impl Cpu {
                     self.sei();
                     current_addressing_mode = addressing_mode;
                 },
+                // No Operation
+                Opcode::Nop(_, addressing_mode) => {
+                    current_addressing_mode = addressing_mode;
+                },
+                // Handling opcode not implemented
                 _ => {
                     return Err(InstructionError::NotImplementedInstruction(op));
                 },
