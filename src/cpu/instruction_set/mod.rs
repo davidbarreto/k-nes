@@ -7,3 +7,4 @@ pub mod register_transfers;
 pub mod increments_decrements;
 pub mod shifts;
 pub mod jumps_calls;
+pub mod stack_operations;

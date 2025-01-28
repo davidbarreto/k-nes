@@ -145,6 +145,11 @@ const JMP_ABSOLUTE: u8 = 0x4C;
 const JMP_INDIRECT: u8 = 0x6C;
 const JSR_ABSOLUTE: u8 = 0x20;
 const RTS: u8 = 0x60;
+const NOP: u8 = 0xEA;
+const PHA: u8 = 0x48;
+const PHP: u8 = 0x08;
+const PLA: u8 = 0x68;
+const PLP: u8 = 0x28;
 
 /// Opcodes of instruction set for 6502 processor
 ///
@@ -257,7 +262,17 @@ pub enum Opcode {
     /// Return from Subroutine
     Rts(u8, AddressingMode),
     /// Break
-    Brk(u8, AddressingMode)
+    Brk(u8, AddressingMode),
+    /// No Operation
+    Nop(u8, AddressingMode),
+    /// Push Accumulator on Stack
+    Pha(u8, AddressingMode),
+    /// Push processor status on Stack
+    Php(u8, AddressingMode),
+    /// Pull Accumulator from Stack
+    Pla(u8, AddressingMode),
+    /// Pull processor status from Stack
+    Plp(u8, AddressingMode),
 }
 
 impl Opcode {
@@ -407,7 +422,12 @@ impl Opcode {
             JMP_INDIRECT => Some(Opcode::Jmp(value, AddressingMode::Indirect)),
             JSR_ABSOLUTE => Some(Opcode::Jsr(value, AddressingMode::Absolute)),
             RTS => Some(Opcode::Rts(value, AddressingMode::Implicit)),
+            PHA => Some(Opcode::Rts(value, AddressingMode::Implicit)),
+            PHP => Some(Opcode::Rts(value, AddressingMode::Implicit)),
+            PLA => Some(Opcode::Rts(value, AddressingMode::Implicit)),
+            PLP => Some(Opcode::Rts(value, AddressingMode::Implicit)),
             BRK => Some(Opcode::Brk(value, AddressingMode::Implicit)),
+            NOP => Some(Opcode::Nop(value, AddressingMode::Implicit)),
             _ => None,
         }
     }
