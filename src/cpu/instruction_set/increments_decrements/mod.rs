@@ -2,19 +2,19 @@ use crate::cpu::types::CpuFlags;
 use crate::cpu::Cpu;
 
 pub trait IncrementsDecrements {
-    fn inc(&mut self, address: u8);
+    fn inc(&mut self, address: u16);
     fn inx(&mut self);
     fn iny(&mut self);
-    fn dec(&mut self, address: u8);
+    fn dec(&mut self, address: u16);
     fn dex(&mut self);
     fn dey(&mut self);
 }
 
 impl IncrementsDecrements for Cpu {
     /// Implementation of INC (Increment Memory) instruction
-    fn inc(&mut self, address: u8) {
-        let val = self.memory.read(address as u16).wrapping_add(0x01);
-        self.memory.write(val, address as u16);
+    fn inc(&mut self, address: u16) {
+        let val = self.memory.read(address).wrapping_add(0x01);
+        self.memory.write(val, address);
         update_flag(self, val);
     }
 
@@ -31,9 +31,9 @@ impl IncrementsDecrements for Cpu {
     }
 
     /// Implementation of DEC (Decrement Memory) instruction
-    fn dec(&mut self, address: u8) {
-        let val = self.memory.read(address as u16).wrapping_add(0xff);
-        self.memory.write(val, address as u16);
+    fn dec(&mut self, address: u16) {
+        let val = self.memory.read(address).wrapping_add(0xff);
+        self.memory.write(val, address);
         update_flag(self, val);
     }
 
