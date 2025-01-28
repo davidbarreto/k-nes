@@ -285,6 +285,15 @@ fn test_easy_6502_our_first_program() {
     // $0607    8d 01 02  STA $0201
     // $060a    a9 08     LDA #$08
     // $060c    8d 02 02  STA $0202
+
+    let program: [u8; 16] = [0xA9, 0x01, 0x8D, 0x00, 0x02, 0xA9, 0x05, 0x8D, 0x01, 0x02, 0xA9, 0x08, 0x8D, 0x02, 0x02, 0x00];
+    let cpu = execute_program(&program);
+
+    assert_eq!(cpu.registers.program_counter, 0x0610);
+    assert_eq!(cpu.registers.accumulator, 0x08);
+    assert_eq!(cpu.memory.read(0x0200), 0x01);
+    assert_eq!(cpu.memory.read(0x0201), 0x05);
+    assert_eq!(cpu.memory.read(0x0202), 0x08);
 }
 
 #[test]
@@ -314,12 +323,11 @@ fn test_easy_6502_instructions_2() {
     // $0600    a9 80     LDA #$80
     // $0602    85 01     STA $01
     // $0604    65 01     ADC $01
-    let program: [u8; 7] = [0xA9, 0xC0, 0xAA, 0xE8, 0x69, 0xC4, 0x00];
+    let program: [u8; 7] = [0xA9, 0x80, 0x85, 0x01, 0x65, 0x01, 0x00];
     let cpu = execute_program(&program);
 
     assert_eq!(cpu.registers.program_counter, 0x0607);
-    assert_eq!(cpu.registers.accumulator, 0x84);
-    assert_eq!(cpu.registers.x_register, 0xC1);
+    assert_eq!(cpu.registers.accumulator, 0x00); // $80 + $80 = 100 => wrapped = 00
 }
 
 #[test]
@@ -355,9 +363,17 @@ fn test_easy_6502_addressing_modes_relative() {
     // $0604    d0 02     BNE $0608
     // $0606    85 22     STA $22
     // $0608    00        BRK 
+
+    let program: [u8; 9] = [0xA9, 0x01, 0xC9, 0x02, 0xD0, 0x02, 0x85, 0x22, 0x00];
+    let cpu = execute_program(&program);
+
+    assert_eq!(cpu.registers.program_counter, 0x0609);
+    assert_eq!(cpu.registers.accumulator, 0x01);
+    assert_eq!(cpu.memory.read(0x0022), 0x00);
 }
 
 #[test]
+#[ignore = "Test not fully implemented"]
 fn test_easy_6502_addressing_modes_indirect() {
     // Address  Hexdump   Dissassembly
     // -------------------------------
@@ -366,9 +382,17 @@ fn test_easy_6502_addressing_modes_indirect() {
     // $0604    a9 cc     LDA #$cc
     // $0606    85 f1     STA $f1
     // $0608    6c f0 00  JMP ($00f0)
+
+    let program: [u8; 12] = [0xA9, 0x01, 0x85, 0xF0, 0xA9, 0xCC, 0x85, 0xF1, 0x6C, 0xF0, 0x00, 0x00];
+    let cpu = execute_program(&program);
+
+    assert_eq!(cpu.registers.program_counter, 0x0609);
+    assert_eq!(cpu.registers.accumulator, 0x01);
+    assert_eq!(cpu.memory.read(0x0022), 0x00);
 }
 
 #[test]
+#[ignore = "Test not fully implemented"]
 fn test_easy_6502_addressing_modes_indexed_indirect() {
     // Address  Hexdump   Dissassembly
     // -------------------------------
@@ -383,6 +407,7 @@ fn test_easy_6502_addressing_modes_indexed_indirect() {
 }
 
 #[test]
+#[ignore = "Stack operations not implemented"]
 fn test_easy_6502_the_stack() {
     // Address  Hexdump   Dissassembly
     // -------------------------------
@@ -400,6 +425,12 @@ fn test_easy_6502_the_stack() {
     // $0613    c8        INY 
     // $0614    c0 20     CPY #$20
     // $0616    d0 f7     BNE $060f
+    let program: [u8; 25] = [0xA2, 0x00, 0xA0, 0x00, 0x8A, 0x99, 0x00, 0x02, 0x48, 0xE8, 0xC8, 0xC0, 0x10, 0xD0, 0xF5, 0x68, 0x99, 0x00, 0x02, 0xC8, 0xC0, 0x20, 0xD0, 0xF7, 0x00];
+    let cpu = execute_program(&program);
+
+    assert_eq!(cpu.registers.program_counter, 0x0609);
+    assert_eq!(cpu.registers.accumulator, 0x01);
+    assert_eq!(cpu.memory.read(0x0022), 0x00);
 }
 
 #[test]
@@ -412,6 +443,12 @@ fn test_easy_6502_jumping_jmp() {
     // $0606    00        BRK 
     // $0607    00        BRK 
     // $0608    8d 00 02  STA $0200
+    let program: [u8; 12] = [0xA9, 0x03, 0x4C, 0x08, 0x06, 0x00, 0x00, 0x00, 0x8D, 0x00, 0x02, 0x00];
+    let cpu = execute_program(&program);
+
+    assert_eq!(cpu.registers.program_counter, 0x060C);
+    assert_eq!(cpu.registers.accumulator, 0x03);
+    assert_eq!(cpu.memory.read(0x0200), 0x03);
 }
 
 #[test]
@@ -442,7 +479,7 @@ fn test_easy_6502_jumping_jsr_rts() {
 }
 
 #[test]
-#[ignore]
+#[ignore = "Assembly test program seems to be wrong"]
 /// This tests uses a program that calculates week day
 /// Reference: (Day of Week)[http://www.6502.org/source/misc/dow.htm]
 /// How to compute the day of the week in 6502 assembly.
