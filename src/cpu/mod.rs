@@ -390,12 +390,14 @@ impl Cpu {
 
             AddressingMode::IndirectX => {
                 let base = self.memory.read(self.registers.program_counter);
-                base.wrapping_add(self.registers.x_register) as u16
+                let address = base.wrapping_add(self.registers.x_register) as u16;
+                self.memory.read_u16(address)
             }
 
             AddressingMode::IndirectY => {
-                let address = self.memory.read(self.registers.program_counter) as u16;
-                address + (self.registers.y_register as u16)
+                let base = self.memory.read(self.registers.program_counter) as u16;
+                let address = self.memory.read_u16(base);
+                address.wrapping_add(self.registers.y_register as u16)
             }
 
             AddressingMode::ZeroPage => self.memory.read(self.registers.program_counter) as u16,
