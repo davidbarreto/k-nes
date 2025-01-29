@@ -182,7 +182,10 @@ fn execute_adc_indirect_x() {
     let zero_page_address: u8 = 0x42;
     let initial_address: u16 = 0x8000;
     let increment_address: u8 = 0x02;
-    let operand_address: u16 = 0x0044;
+    let indirect_address: u16 = 0x0044;
+    let operand_address_lsb: u8 = 0x09;
+    let operand_address_msb: u8 = 0x07;
+    let operand_address: u16 = 0x0709;
 
     // When
     let mut cpu = Cpu::new();
@@ -190,6 +193,8 @@ fn execute_adc_indirect_x() {
     cpu.registers.x_register = increment_address;
     cpu.registers.accumulator = operand_1;
     cpu.memory.write(zero_page_address, initial_address+1);
+    cpu.memory.write(operand_address_lsb, indirect_address);
+    cpu.memory.write(operand_address_msb, indirect_address+1);
     cpu.memory.write(operand_2, operand_address);
 
     // Then
@@ -203,12 +208,15 @@ fn execute_adc_indirect_x_with_high_x_value() {
     // Given
     let operand_1: u8 = 0x69;
     let operand_2: u8 = 0x96;
-    let expected_result: u8 = 0xff;
+    let expected_result: u8 = 0xFF;
     let zero_page_address: u8 = 0x80;
     let initial_address: u16 = 0x8000;
     let increment_address: u8 = 0xff;
     // 0x80 + 0xff = 0x007f instead of 0x017f because of zero page addressing (wrap around)
-    let operand_address: u16 = 0x007f;
+    let indirect_address: u16 = 0x007F;
+    let operand_address_lsb: u8 = 0x09;
+    let operand_address_msb: u8 = 0x07;
+    let operand_address: u16 = 0x0709;
 
     // When
     let mut cpu = Cpu::new();
@@ -216,6 +224,8 @@ fn execute_adc_indirect_x_with_high_x_value() {
     cpu.registers.x_register = increment_address;
     cpu.registers.accumulator = operand_1;
     cpu.memory.write(zero_page_address, initial_address+1);
+    cpu.memory.write(operand_address_lsb, indirect_address);
+    cpu.memory.write(operand_address_msb, indirect_address+1);
     cpu.memory.write(operand_2, operand_address);
 
     // Then
@@ -229,11 +239,14 @@ fn execute_adc_indirect_y() {
     // Given
     let operand_1: u8 = 0x69;
     let operand_2: u8 = 0x96;
-    let expected_result: u8 = 0xff;
+    let expected_result: u8 = 0xFF;
     let zero_page_address: u8 = 0x42;
     let initial_address: u16 = 0x8000;
     let increment_address: u8 = 0x02;
-    let operand_address: u16 = 0x0044;
+    let indirect_address: u16 = 0x0042;
+    let operand_address_lsb: u8 = 0x09;
+    let operand_address_msb: u8 = 0x07;
+    let operand_address: u16 = 0x070B;
 
     // When
     let mut cpu = Cpu::new();
@@ -241,6 +254,8 @@ fn execute_adc_indirect_y() {
     cpu.registers.y_register = increment_address;
     cpu.registers.accumulator = operand_1;
     cpu.memory.write(zero_page_address, initial_address+1);
+    cpu.memory.write(operand_address_lsb, indirect_address);
+    cpu.memory.write(operand_address_msb, indirect_address+1);
     cpu.memory.write(operand_2, operand_address);
 
     // Then
@@ -254,12 +269,14 @@ fn execute_adc_indirect_y_with_high_y_value() {
     // Given
     let operand_1: u8 = 0x69;
     let operand_2: u8 = 0x96;
-    let expected_result: u8 = 0xff;
+    let expected_result: u8 = 0xFF;
     let zero_page_address: u8 = 0x80;
     let initial_address: u16 = 0x8000;
-    let increment_address: u8 = 0xff;
-    // 0x80 + 0xff = 0x017f normally (zero page is not applied to the sum)
-    let operand_address: u16 = 0x017f;
+    let increment_address: u8 = 0xFF;
+    let indirect_address: u16 = 0x0080;
+    let operand_address_lsb: u8 = 0x09;
+    let operand_address_msb: u8 = 0x07;
+    let operand_address: u16 = 0x0808;
 
     // When
     let mut cpu = Cpu::new();
@@ -267,6 +284,8 @@ fn execute_adc_indirect_y_with_high_y_value() {
     cpu.registers.y_register = increment_address;
     cpu.registers.accumulator = operand_1;
     cpu.memory.write(zero_page_address, initial_address+1);
+    cpu.memory.write(operand_address_lsb, indirect_address);
+    cpu.memory.write(operand_address_msb, indirect_address+1);
     cpu.memory.write(operand_2, operand_address);
 
     // Then
@@ -327,7 +346,8 @@ fn test_easy_6502_instructions_2() {
     let cpu = execute_program(&program);
 
     assert_eq!(cpu.registers.program_counter, 0x0607);
-    assert_eq!(cpu.registers.accumulator, 0x00); // $80 + $80 = 100 => wrapped = 00
+    // $80 + $80 = 100 => wrapped = 00
+    assert_eq!(cpu.registers.accumulator, 0x00);
 }
 
 #[test]
@@ -392,7 +412,6 @@ fn test_easy_6502_addressing_modes_indirect() {
 }
 
 #[test]
-#[ignore = "Test not fully implemented"]
 fn test_easy_6502_addressing_modes_indexed_indirect() {
     // Address  Hexdump   Dissassembly
     // -------------------------------
@@ -404,6 +423,42 @@ fn test_easy_6502_addressing_modes_indexed_indirect() {
     // $060a    a0 0a     LDY #$0a
     // $060c    8c 05 07  STY $0705
     // $060f    a1 00     LDA ($00,X)
+    let program: [u8; 18] = [0xA2, 0x01, 0xA9, 0x05, 0x85, 0x01, 0xA9, 0x07, 0x85, 0x02, 0xA0, 0x0A, 0x8C, 0x05, 0x07, 0xA1, 0x00, 0x00];
+    let cpu = execute_program(&program);
+
+    assert_eq!(cpu.registers.program_counter, 0x0612);
+    assert_eq!(cpu.registers.accumulator, 0x0A);
+    assert_eq!(cpu.registers.x_register, 0x01);
+    assert_eq!(cpu.registers.y_register, 0x0A);
+    assert_eq!(cpu.memory.read(0x0000), 0x00);
+    assert_eq!(cpu.memory.read(0x0001), 0x05);
+    assert_eq!(cpu.memory.read(0x0002), 0x07);
+    assert_eq!(cpu.memory.read(0x0705), 0x0A);
+}
+
+#[test]
+fn test_easy_6502_addressing_modes_indirect_indexed() {
+    // Address  Hexdump   Dissassembly
+    // -------------------------------
+    // $0600    a0 01     LDY #$01
+    // $0602    a9 03     LDA #$03
+    // $0604    85 01     STA $01
+    // $0606    a9 07     LDA #$07
+    // $0608    85 02     STA $02
+    // $060a    a2 0a     LDX #$0a
+    // $060c    8e 04 07  STX $0704
+    // $060f    b1 01     LDA ($01),Y
+    let program: [u8; 18] = [0xA0, 0x01, 0xA9, 0x03, 0x85, 0x01, 0xA9, 0x07, 0x85, 0x02, 0xA2, 0x0A, 0x8E, 0x04, 0x07, 0xB1, 0x01, 0x00];
+    let cpu = execute_program(&program);
+
+    assert_eq!(cpu.registers.program_counter, 0x0612);
+    assert_eq!(cpu.registers.accumulator, 0x0A);
+    assert_eq!(cpu.registers.x_register, 0x0A);
+    assert_eq!(cpu.registers.y_register, 0x01);
+    assert_eq!(cpu.memory.read(0x0000), 0x00);
+    assert_eq!(cpu.memory.read(0x0001), 0x03);
+    assert_eq!(cpu.memory.read(0x0002), 0x07);
+    assert_eq!(cpu.memory.read(0x0704), 0x0A);
 }
 
 #[test]
