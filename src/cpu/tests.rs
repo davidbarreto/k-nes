@@ -393,7 +393,6 @@ fn test_easy_6502_addressing_modes_relative() {
 }
 
 #[test]
-#[ignore = "Test not fully implemented"]
 fn test_easy_6502_addressing_modes_indirect() {
     // Address  Hexdump   Dissassembly
     // -------------------------------
@@ -403,12 +402,13 @@ fn test_easy_6502_addressing_modes_indirect() {
     // $0606    85 f1     STA $f1
     // $0608    6c f0 00  JMP ($00f0)
 
-    let program: [u8; 12] = [0xA9, 0x01, 0x85, 0xF0, 0xA9, 0xCC, 0x85, 0xF1, 0x6C, 0xF0, 0x00, 0x00];
+    // As memory is initialized with 0's, address $CC01 has 00, which is interpreted as BRK
+    let program: [u8; 11] = [0xA9, 0x01, 0x85, 0xF0, 0xA9, 0xCC, 0x85, 0xF1, 0x6C, 0xF0, 0x00];
     let cpu = execute_program(&program);
 
-    assert_eq!(cpu.registers.program_counter, 0x0609);
-    assert_eq!(cpu.registers.accumulator, 0x01);
-    assert_eq!(cpu.memory.read(0x0022), 0x00);
+    assert_eq!(cpu.registers.program_counter, 0xCC02);
+    assert_eq!(cpu.registers.accumulator, 0xCC);
+    assert_eq!(cpu.memory.read_u16(0x00F0), 0xCC01);
 }
 
 #[test]
