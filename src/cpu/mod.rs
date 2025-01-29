@@ -17,10 +17,11 @@ use instruction_set::register_transfers::RegisterTransfers;
 use instruction_set::shifts::Shifts;
 use instruction_set::stack_operations::StackOperations;
 use instruction_set::status_flag_change::StatusFlagChange;
+use instruction_set::system_functions::SystemFunctions;
 
 use register_bank::RegisterBank;
 use opcode::Opcode;
-use types::InstructionError;
+use types::{CpuFlags, InstructionError};
 
 pub struct Cpu {
     registers: RegisterBank,
@@ -44,17 +45,15 @@ impl Cpu {
 
     pub fn execute_program(&mut self) -> Result<(), InstructionError> {
         loop {
-            let opcode = self.memory.read(self.registers.program_counter);
-            if opcode == opcode::BRK {
-                self.registers.program_counter += 1;
-                break;
+            if self.registers.status.contains(CpuFlags::BREAK) {
+                return Ok(())
             }
+            let opcode = self.memory.read(self.registers.program_counter);
             match self.execute_instruction(opcode) {
                 Err(instruction_error) => return Err(instruction_error),
                 Ok(_) => ()
             }
         }
-        Ok(())
     }
 
     fn execute_instruction(&mut self, op: u8) -> Result<(), InstructionError> {
@@ -338,14 +337,19 @@ impl Cpu {
                     self.sei();
                     current_addressing_mode = addressing_mode;
                 },
-                // No Operation
-                Opcode::Nop(_, addressing_mode) => {
+                // System functions
+                Opcode::Brk(_, addressing_mode) => {
+                    self.brk();
                     current_addressing_mode = addressing_mode;
                 },
-                // Handling opcode not implemented
-                _ => {
-                    return Err(InstructionError::NotImplementedInstruction(op));
+                Opcode::Nop(_, addressing_mode) => {
+                    // NOP does nothing but increment program counter...
+                    current_addressing_mode = addressing_mode;
                 },
+                Opcode::Rti(_, addressing_mode) => {
+                    self.rti();
+                    current_addressing_mode = addressing_mode;
+                }
             }
 
             // Jump instructions will set PC direct to next instruction address
