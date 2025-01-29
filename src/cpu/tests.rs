@@ -407,7 +407,6 @@ fn test_easy_6502_addressing_modes_indexed_indirect() {
 }
 
 #[test]
-#[ignore = "Stack operations not implemented"]
 fn test_easy_6502_the_stack() {
     // Address  Hexdump   Dissassembly
     // -------------------------------
@@ -427,10 +426,17 @@ fn test_easy_6502_the_stack() {
     // $0616    d0 f7     BNE $060f
     let program: [u8; 25] = [0xA2, 0x00, 0xA0, 0x00, 0x8A, 0x99, 0x00, 0x02, 0x48, 0xE8, 0xC8, 0xC0, 0x10, 0xD0, 0xF5, 0x68, 0x99, 0x00, 0x02, 0xC8, 0xC0, 0x20, 0xD0, 0xF7, 0x00];
     let cpu = execute_program(&program);
+    let mut expected_array: [u8; 16] = [0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0xA, 0xB, 0xC, 0xD, 0x0E, 0x0F];
 
-    assert_eq!(cpu.registers.program_counter, 0x0609);
-    assert_eq!(cpu.registers.accumulator, 0x01);
-    assert_eq!(cpu.memory.read(0x0022), 0x00);
+    assert_eq!(cpu.registers.program_counter, 0x0619);
+    assert_eq!(cpu.registers.accumulator, 0x00);
+    assert_eq!(cpu.registers.x_register, 0x10);
+    assert_eq!(cpu.registers.y_register, 0x20);
+    assert_eq!(cpu.registers.stack_pointer, 0xFF);
+    assert_eq!(cpu.memory.read_as_array(0x0200), expected_array);
+    expected_array.reverse();
+    assert_eq!(cpu.memory.read_as_array(0x01F0), expected_array);
+    assert_eq!(cpu.memory.read_as_array(0x0210), expected_array);
 }
 
 #[test]
