@@ -8,3 +8,4 @@ pub mod increments_decrements;
 pub mod shifts;
 pub mod jumps_calls;
 pub mod stack_operations;
+pub mod system_functions;
