@@ -25,6 +25,11 @@ impl Memory {
         msb << 8 | lsb
     }
 
+    pub fn read_as_array<const N: usize>(&self, address: usize) -> [u8; N] {
+        let mut array = [0u8; N];
+        array.copy_from_slice(&self.mem[address..address + N]);
+        array
+    }
     pub fn write(&mut self, data: u8, address: u16) {
         self.mem[address as usize] = data;
     }
