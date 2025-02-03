@@ -1,3 +1,4 @@
+use std::fmt;
 use regex::Regex;
 use lazy_static::lazy_static;
 
@@ -171,5 +172,26 @@ impl AddressingMode {
             AddressingMode::Accumulator => &ACCUMULATOR_REGEX,
             AddressingMode::Relative => &RELATIVE_REGEX
         }
+    }
+}
+
+impl fmt::Display for AddressingMode {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let s = match self {
+            AddressingMode::Implicit => "Implicit",
+            AddressingMode::Immediate => "Immediate",
+            AddressingMode::ZeroPage => "ZeroPage",
+            AddressingMode::ZeroPageX => "ZeroPageX",
+            AddressingMode::ZeroPageY => "ZeroPageY",
+            AddressingMode::Absolute => "Absolute",
+            AddressingMode::AbsoluteX => "AbsoluteX",
+            AddressingMode::AbsoluteY => "AbsoluteY",
+            AddressingMode::Indirect => "Indirect",
+            AddressingMode::IndirectX => "IndirectX",
+            AddressingMode::IndirectY => "IndirectY",
+            AddressingMode::Accumulator => "Accumulator",
+            AddressingMode::Relative => "Relative",
+        };
+        write!(f, "{}", s)
     }
 }
