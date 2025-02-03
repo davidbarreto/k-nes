@@ -1,4 +1,285 @@
+use std::collections::HashMap;
+use std::collections::HashSet;
+use lazy_static::lazy_static;
+
 use crate::memory::types::AddressingMode;
+
+use super::types::InstructionError;
+
+lazy_static! {
+    static ref OPCODE_MAP: HashMap<(&'static str, AddressingMode), u8> = {
+        let mut map = HashMap::new();
+        map.insert(("ADC", AddressingMode::Immediate), ADC_IMMEDIATE);
+        map.insert(("ADC", AddressingMode::ZeroPage), ADC_ZERO_PAGE);
+        map.insert(("ADC", AddressingMode::ZeroPageX), ADC_ZERO_PAGE_X);
+        map.insert(("ADC", AddressingMode::Absolute), ADC_ABSOLUTE);
+        map.insert(("ADC", AddressingMode::AbsoluteX), ADC_ABSOLUTE_X);
+        map.insert(("ADC", AddressingMode::AbsoluteY), ADC_ABSOLUTE_Y);
+        map.insert(("ADC", AddressingMode::IndirectX), ADC_INDIRECT_X);
+        map.insert(("ADC", AddressingMode::IndirectY), ADC_INDIRECT_Y);
+        
+        map.insert(("AND", AddressingMode::Immediate), AND_IMMEDIATE);
+        map.insert(("AND", AddressingMode::ZeroPage), AND_ZERO_PAGE);
+        map.insert(("AND", AddressingMode::ZeroPageX), AND_ZERO_PAGE_X);
+        map.insert(("AND", AddressingMode::Absolute), AND_ABSOLUTE);
+        map.insert(("AND", AddressingMode::AbsoluteX), AND_ABSOLUTE_X);
+        map.insert(("AND", AddressingMode::AbsoluteY), AND_ABSOLUTE_Y);
+        map.insert(("AND", AddressingMode::IndirectX), AND_INDIRECT_X);
+        map.insert(("AND", AddressingMode::IndirectY), AND_INDIRECT_Y);
+
+        map.insert(("ASL", AddressingMode::Accumulator), ASL_ACCUMULATOR);
+        map.insert(("ASL", AddressingMode::ZeroPage), ASL_ZERO_PAGE);
+        map.insert(("ASL", AddressingMode::ZeroPageX), ASL_ZERO_PAGE_X);
+        map.insert(("ASL", AddressingMode::Absolute), ASL_ABSOLUTE);
+        map.insert(("ASL", AddressingMode::AbsoluteX), ASL_ABSOLUTE_X);
+
+        map.insert(("BCC", AddressingMode::Relative), BCC);
+
+        map.insert(("BCS", AddressingMode::Relative), BCS);
+
+        map.insert(("BEQ", AddressingMode::Relative), BEQ);
+
+        map.insert(("BIT", AddressingMode::ZeroPage), BIT_ZERO_PAGE);
+        map.insert(("BIT", AddressingMode::Absolute), BIT_ABSOLUTE);
+
+        map.insert(("BMI", AddressingMode::Relative), BMI);
+
+        map.insert(("BNE", AddressingMode::Relative), BNE);
+
+        map.insert(("BPL", AddressingMode::Relative), BPL);
+
+        map.insert(("BRK", AddressingMode::Relative), BRK);
+
+        map.insert(("BVC", AddressingMode::Relative), BVC);
+
+        map.insert(("BNS", AddressingMode::Relative), BVS);
+
+        map.insert(("CLC", AddressingMode::Implicit), CLC);
+
+        map.insert(("CLD", AddressingMode::Implicit), CLD);
+
+        map.insert(("CLI", AddressingMode::Implicit), CLI);
+
+        map.insert(("CLV", AddressingMode::Implicit), CLV);
+
+        map.insert(("CMP", AddressingMode::Immediate), CMP_IMMEDIATE);
+        map.insert(("CMP", AddressingMode::ZeroPage), CMP_ZERO_PAGE);
+        map.insert(("CMP", AddressingMode::ZeroPageX), CMP_ZERO_PAGE_X);
+        map.insert(("CMP", AddressingMode::Absolute), CMP_ABSOLUTE);
+        map.insert(("CMP", AddressingMode::AbsoluteX), CMP_ABSOLUTE_X);
+        map.insert(("CMP", AddressingMode::AbsoluteY), CMP_ABSOLUTE_Y);
+        map.insert(("CMP", AddressingMode::IndirectX), CMP_INDIRECT_X);
+        map.insert(("CMP", AddressingMode::IndirectY), CMP_INDIRECT_Y);
+
+        map.insert(("CPX", AddressingMode::Immediate), CPX_IMMEDIATE);
+        map.insert(("CPX", AddressingMode::ZeroPage), CPX_ZERO_PAGE);
+        map.insert(("CPX", AddressingMode::Absolute), CPX_ABSOLUTE);
+
+        map.insert(("CPY", AddressingMode::Immediate), CPY_IMMEDIATE);
+        map.insert(("CPY", AddressingMode::ZeroPage), CPY_ZERO_PAGE);
+        map.insert(("CPY", AddressingMode::Absolute), CPY_ABSOLUTE);
+
+        map.insert(("DEC", AddressingMode::ZeroPage), DEC_ZERO_PAGE);
+        map.insert(("DEC", AddressingMode::ZeroPageX), DEC_ZERO_PAGE_X);
+        map.insert(("DEC", AddressingMode::Absolute), DEC_ABSOLUTE);
+        map.insert(("DEC", AddressingMode::AbsoluteX), DEC_ABSOLUTE_X);
+
+        map.insert(("DEX", AddressingMode::Implicit), DEX);
+
+        map.insert(("DEY", AddressingMode::Implicit), DEY);
+
+        map.insert(("EOR", AddressingMode::Immediate), EOR_IMMEDIATE);
+        map.insert(("EOR", AddressingMode::ZeroPage), EOR_ZERO_PAGE);
+        map.insert(("EOR", AddressingMode::ZeroPageX), EOR_ZERO_PAGE_X);
+        map.insert(("EOR", AddressingMode::Absolute), EOR_ABSOLUTE);
+        map.insert(("EOR", AddressingMode::AbsoluteX), EOR_ABSOLUTE_X);
+        map.insert(("EOR", AddressingMode::AbsoluteY), EOR_ABSOLUTE_Y);
+        map.insert(("EOR", AddressingMode::IndirectX), EOR_INDIRECT_X);
+        map.insert(("EOR", AddressingMode::IndirectY), EOR_INDIRECT_Y);
+
+        map.insert(("INC", AddressingMode::ZeroPage), INC_ZERO_PAGE);
+        map.insert(("INC", AddressingMode::ZeroPageX), INC_ZERO_PAGE_X);
+        map.insert(("INC", AddressingMode::Absolute), INC_ABSOLUTE);
+        map.insert(("INC", AddressingMode::AbsoluteX), INC_ABSOLUTE_X);
+
+        map.insert(("INX", AddressingMode::Implicit), INX);
+
+        map.insert(("INY", AddressingMode::Implicit), INY);
+
+        map.insert(("JMP", AddressingMode::Absolute), JMP_ABSOLUTE);
+        map.insert(("JMP", AddressingMode::Indirect), JMP_INDIRECT);
+
+        map.insert(("JSR", AddressingMode::Absolute), JSR_ABSOLUTE);
+
+        map.insert(("LDA", AddressingMode::Immediate), LDA_IMMEDIATE);
+        map.insert(("LDA", AddressingMode::ZeroPage), LDA_ZERO_PAGE);
+        map.insert(("LDA", AddressingMode::ZeroPageX), LDA_ZERO_PAGE_X);
+        map.insert(("LDA", AddressingMode::Absolute), LDA_ABSOLUTE);
+        map.insert(("LDA", AddressingMode::AbsoluteX), LDA_ABSOLUTE_X);
+        map.insert(("LDA", AddressingMode::AbsoluteY), LDA_ABSOLUTE_Y);
+        map.insert(("LDA", AddressingMode::IndirectX), LDA_INDIRECT_X);
+        map.insert(("LDA", AddressingMode::IndirectY), LDA_INDIRECT_Y);
+
+        map.insert(("LDX", AddressingMode::Immediate), LDX_IMMEDIATE);
+        map.insert(("LDX", AddressingMode::ZeroPage), LDX_ZERO_PAGE);
+        map.insert(("LDX", AddressingMode::ZeroPageY), LDX_ZERO_PAGE_Y);
+        map.insert(("LDX", AddressingMode::Absolute), LDX_ABSOLUTE);
+        map.insert(("LDX", AddressingMode::AbsoluteY), LDX_ABSOLUTE_Y);
+
+        map.insert(("LDY", AddressingMode::Immediate), LDY_IMMEDIATE);
+        map.insert(("LDY", AddressingMode::ZeroPage), LDY_ZERO_PAGE);
+        map.insert(("LDY", AddressingMode::ZeroPageX), LDY_ZERO_PAGE_X);
+        map.insert(("LDY", AddressingMode::Absolute), LDY_ABSOLUTE);
+        map.insert(("LDY", AddressingMode::AbsoluteX), LDY_ABSOLUTE_X);
+
+        map.insert(("LSR", AddressingMode::Accumulator), LSR_ACCUMULATOR);
+        map.insert(("LSR", AddressingMode::ZeroPage), LSR_ZERO_PAGE);
+        map.insert(("LSR", AddressingMode::ZeroPageX), LSR_ZERO_PAGE_X);
+        map.insert(("LSR", AddressingMode::Absolute), LSR_ABSOLUTE);
+        map.insert(("LSR", AddressingMode::AbsoluteX), LSR_ABSOLUTE_X);
+
+        map.insert(("NOP", AddressingMode::Implicit), NOP);
+
+        map.insert(("ORA", AddressingMode::Immediate), ORA_IMMEDIATE);
+        map.insert(("ORA", AddressingMode::ZeroPage), ORA_ZERO_PAGE);
+        map.insert(("ORA", AddressingMode::ZeroPageX), ORA_ZERO_PAGE_X);
+        map.insert(("ORA", AddressingMode::Absolute), ORA_ABSOLUTE);
+        map.insert(("ORA", AddressingMode::AbsoluteX), ORA_ABSOLUTE_X);
+        map.insert(("ORA", AddressingMode::AbsoluteY), ORA_ABSOLUTE_Y);
+        map.insert(("ORA", AddressingMode::IndirectX), ORA_INDIRECT_X);
+        map.insert(("ORA", AddressingMode::IndirectY), ORA_INDIRECT_Y);
+
+        map.insert(("PHA", AddressingMode::Implicit), PHA);
+
+        map.insert(("PHP", AddressingMode::Implicit), PHP);
+
+        map.insert(("PLA", AddressingMode::Implicit), PLA);
+
+        map.insert(("PLP", AddressingMode::Implicit), PLP);
+
+        map.insert(("ROL", AddressingMode::Accumulator), ROL_ACCUMULATOR);
+        map.insert(("ROL", AddressingMode::ZeroPage), ROL_ZERO_PAGE);
+        map.insert(("ROL", AddressingMode::ZeroPageX), ROL_ZERO_PAGE_X);
+        map.insert(("ROL", AddressingMode::Absolute), ROL_ABSOLUTE);
+        map.insert(("ROL", AddressingMode::AbsoluteX), ROL_ABSOLUTE_X);
+
+        map.insert(("ROR", AddressingMode::Accumulator), ROR_ACCUMULATOR);
+        map.insert(("ROR", AddressingMode::ZeroPage), ROR_ZERO_PAGE);
+        map.insert(("ROR", AddressingMode::ZeroPageX), ROR_ZERO_PAGE_X);
+        map.insert(("ROR", AddressingMode::Absolute), ROR_ABSOLUTE);
+        map.insert(("ROR", AddressingMode::AbsoluteX), ROR_ABSOLUTE_X);
+
+        map.insert(("RTI", AddressingMode::Implicit), RTI);
+
+        map.insert(("RTS", AddressingMode::Implicit), RTS);
+
+        map.insert(("SBC", AddressingMode::Immediate), SBC_IMMEDIATE);
+        map.insert(("SBC", AddressingMode::ZeroPage), SBC_ZERO_PAGE);
+        map.insert(("SBC", AddressingMode::ZeroPageX), SBC_ZERO_PAGE_X);
+        map.insert(("SBC", AddressingMode::Absolute), SBC_ABSOLUTE);
+        map.insert(("SBC", AddressingMode::AbsoluteX), SBC_ABSOLUTE_X);
+        map.insert(("SBC", AddressingMode::AbsoluteY), SBC_ABSOLUTE_Y);
+        map.insert(("SBC", AddressingMode::IndirectX), SBC_INDIRECT_X);
+        map.insert(("SBC", AddressingMode::IndirectY), SBC_INDIRECT_Y);
+
+        map.insert(("SEC", AddressingMode::Implicit), SEC);
+
+        map.insert(("SED", AddressingMode::Implicit), SED);
+
+        map.insert(("SEI", AddressingMode::Implicit), SEI);
+
+        map.insert(("STA", AddressingMode::ZeroPage), STA_ZERO_PAGE);
+        map.insert(("STA", AddressingMode::ZeroPageX), STA_ZERO_PAGE_X);
+        map.insert(("STA", AddressingMode::Absolute), STA_ABSOLUTE);
+        map.insert(("STA", AddressingMode::AbsoluteX), STA_ABSOLUTE_X);
+        map.insert(("STA", AddressingMode::AbsoluteY), STA_ABSOLUTE_Y);
+        map.insert(("STA", AddressingMode::IndirectX), STA_INDIRECT_X);
+        map.insert(("STA", AddressingMode::IndirectY), STA_INDIRECT_Y);
+
+        map.insert(("STX", AddressingMode::ZeroPage), STX_ZERO_PAGE);
+        map.insert(("STX", AddressingMode::ZeroPageY), STX_ZERO_PAGE_Y);
+        map.insert(("STX", AddressingMode::Absolute), STX_ABSOLUTE);
+
+        map.insert(("STY", AddressingMode::ZeroPage), STY_ZERO_PAGE);
+        map.insert(("STY", AddressingMode::ZeroPageX), STY_ZERO_PAGE_X);
+        map.insert(("STY", AddressingMode::Absolute), STY_ABSOLUTE);
+
+        map.insert(("TAX", AddressingMode::Implicit), TAX);
+
+        map.insert(("TAY", AddressingMode::Implicit), TAY);
+
+        map.insert(("TSX", AddressingMode::Implicit), TSX);
+
+        map.insert(("TXA", AddressingMode::Implicit), TXA);
+
+        map.insert(("TXS", AddressingMode::Implicit), TXS);
+
+        map.insert(("TYA", AddressingMode::Implicit), TYA);
+
+        map
+    };
+
+    static ref OPCODE_SET: HashSet<&'static str> = {
+        let mut set = HashSet::new();
+        set.insert("ADC");
+        set.insert("AND");
+        set.insert("ASL");
+        set.insert("BCC");
+        set.insert("BCS");
+        set.insert("BEQ");
+        set.insert("BIT");
+        set.insert("BMI");
+        set.insert("BNE");
+        set.insert("BPL");
+        set.insert("BRK");
+        set.insert("BVC");
+        set.insert("BVS");
+        set.insert("CLC");
+        set.insert("CLD");
+        set.insert("CLI");
+        set.insert("CLV");
+        set.insert("CMP");
+        set.insert("CPX");
+        set.insert("CPY");
+        set.insert("DEC");
+        set.insert("DEX");
+        set.insert("DEY");
+        set.insert("EOR");
+        set.insert("INC");
+        set.insert("INX");
+        set.insert("INY");
+        set.insert("JMP");
+        set.insert("JSR");
+        set.insert("LDA");
+        set.insert("LDX");
+        set.insert("LDY");
+        set.insert("LSR");
+        set.insert("NOP");
+        set.insert("ORA");
+        set.insert("PHA");
+        set.insert("PHP");
+        set.insert("PLA");
+        set.insert("PLP");
+        set.insert("ROL");
+        set.insert("ROR");
+        set.insert("RTI");
+        set.insert("RTS");
+        set.insert("SBC");
+        set.insert("SEC");
+        set.insert("SED");
+        set.insert("STA");
+        set.insert("STX");
+        set.insert("STY");
+        set.insert("TAX");
+        set.insert("TAY");
+        set.insert("TSX");
+        set.insert("TXA");
+        set.insert("TXS");
+        set.insert("TYA");
+
+        set
+    };
+}
 
 pub const BRK: u8 = 0x00;
 pub const ADC_IMMEDIATE: u8 = 0x69;
@@ -442,5 +723,89 @@ impl Opcode {
             Opcode::Jmp(_, _) | Opcode::Jsr(_, _) => true,
             _ => false
         }
+    }
+}
+
+pub fn translate_instruction_to_opcode(mnemonic: &str, addressing_mode: AddressingMode) -> Result<u8, InstructionError> {
+    OPCODE_MAP.get(&(mnemonic, addressing_mode))
+        .copied()
+        .ok_or_else(|| InstructionError::InvalidIMnemonicAndAddressingModePair(mnemonic.to_string(), addressing_mode.to_string()))
+}
+
+pub fn is_valid_mnemonic(mnemonic: &str) -> bool {
+    OPCODE_SET.contains(mnemonic)
+}
+
+pub fn addressing_modes_from_mnemonic(mnemonic: &str) -> Result<Vec<AddressingMode>, InstructionError> {
+    match mnemonic {
+        "ADC" | "SBC" | "CMP" | "AND" | "EOR" | "ORA" | "LDA" => Ok(vec![
+            AddressingMode::Immediate,
+            AddressingMode::ZeroPage,
+            AddressingMode::ZeroPageX,
+            AddressingMode::Absolute,
+            AddressingMode::AbsoluteX,
+            AddressingMode::AbsoluteY,
+            AddressingMode::IndirectX,
+            AddressingMode::IndirectY,
+        ]),
+        "ASL" | "LSR" | "ROL" | "ROR" => Ok(vec![
+            AddressingMode::Accumulator,
+            AddressingMode::ZeroPage,
+            AddressingMode::ZeroPageX,
+            AddressingMode::Absolute,
+            AddressingMode::AbsoluteX,
+        ]),
+        "BCC" | "BSC" | "BEQ" | "BMI" | "BNE" | "BPL" | "BVC" | "BVS" => Ok(vec![AddressingMode::Relative]),
+        "BIT" => Ok(vec![AddressingMode::ZeroPage, AddressingMode::Absolute]),
+        "BRK" | "CLC" | "CLD" | "CLI" | "CLV" | "DEX" | "DEY" | "INX" | "INY" | "NOP" | "PHA" | "PHP" | "PLA" | "PLP" | "RTI" | "RTS" | "SEC" | "SED" | "SEI" | "TAX" | "TAY" | "TSX" | "TXA" | "TXS" | "TYA" => Ok(vec![AddressingMode::Implicit]),
+        "CPX" | "CPY" => Ok(vec![
+            AddressingMode::Immediate,
+            AddressingMode::ZeroPage,
+            AddressingMode::Absolute,
+        ]),
+        "DEC" | "INC" => Ok(vec![
+            AddressingMode::ZeroPage,
+            AddressingMode::ZeroPageX,
+            AddressingMode::Absolute,
+            AddressingMode::AbsoluteX,
+        ]),
+        "JMP" => Ok(vec![AddressingMode::Absolute, AddressingMode::Indirect]),
+        "JSR" => Ok(vec![AddressingMode::Absolute]),
+        "LDX" => Ok(vec![
+            AddressingMode::Immediate,
+            AddressingMode::ZeroPage,
+            AddressingMode::ZeroPageY,
+            AddressingMode::Absolute,
+            AddressingMode::AbsoluteY,
+        ]),
+        "LDY" => Ok(vec![
+            AddressingMode::Immediate,
+            AddressingMode::ZeroPage,
+            AddressingMode::ZeroPageX,
+            AddressingMode::Absolute,
+            AddressingMode::AbsoluteX,
+        ]),
+        "STA" => Ok(vec![
+            AddressingMode::ZeroPage,
+            AddressingMode::ZeroPageX,
+            AddressingMode::Absolute,
+            AddressingMode::AbsoluteX,
+            AddressingMode::AbsoluteY,
+            AddressingMode::IndirectX,
+            AddressingMode::IndirectY,
+        ]),
+        "STX" => Ok(vec![
+            AddressingMode::ZeroPage,
+            AddressingMode::ZeroPageY,
+            AddressingMode::Absolute,
+            AddressingMode::AbsoluteY,
+        ]),
+        "STY" => Ok(vec![
+            AddressingMode::ZeroPage,
+            AddressingMode::ZeroPageX,
+            AddressingMode::Absolute,
+            AddressingMode::AbsoluteX,
+        ]),
+        _ => Err(InstructionError::InvalidInstruction(mnemonic.to_string())),
     }
 }
