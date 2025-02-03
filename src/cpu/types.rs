@@ -4,17 +4,37 @@ use std::fmt;
 #[derive(Debug, PartialEq)]
 pub enum InstructionError {
     InvalidOpcode(u8),
-    NotImplementedInstruction(u8),
+    InvalidInstruction(String),
+    NotImplementedOpcode(u8),
+    NotImplementedInstruction(String),
+    InvalidIMnemonicAndAddressingModePair(String, String),
+    AddressingModeNotRecognized(String),
+    FatalError(String)
 }
 
 impl fmt::Display for InstructionError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match *self {
+        match self {
             InstructionError::InvalidOpcode(opcode) => {
                 write!(f, "Invalid opcode: 0x{:02X}", opcode)
             }
-            InstructionError::NotImplementedInstruction(opcode) => {
-                write!(f, "Not implemented instruction: 0x{:02X}", opcode)
+            InstructionError::NotImplementedOpcode(opcode) => {
+                write!(f, "Not implemented opcode: 0x{:02X}", opcode)
+            },
+            InstructionError::NotImplementedInstruction(mnemonic) => {
+                write!(f, "Not implemented instruction: {}", mnemonic)
+            },
+            InstructionError::InvalidIMnemonicAndAddressingModePair(mnemonic, addressing_mode) => {
+                write!(f, "The mnemonic/addressing mode pair [{}/{}] is invalid", mnemonic, addressing_mode)
+            },
+            InstructionError::InvalidInstruction(ref mnemonic) => {
+                write!(f, "Invalid instruction with mnemonic: {}", mnemonic)
+            },
+            InstructionError::AddressingModeNotRecognized(ref data) => {
+                write!(f, "Addressing mode not recognized for data: {}", data)
+            },
+            InstructionError::FatalError(ref message) => {
+                write!(f, "Fatal error! Message: {}", message)
             }
         }
     }
