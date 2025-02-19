@@ -2,34 +2,23 @@ use std::fmt;
 use regex::Regex;
 use lazy_static::lazy_static;
 
-const HEX_8_BIT: &str = r"(\$|0x)[0-9A-Fa-f]{2}";
-const BIN_8_BIT: &str = r"(%|0b)[01]{8}";
-const OCTAL_8_BIT:&str = r"(@|0o)[0-7]{1,3}";
-const DEC_8_BIT: &str = r"25[0-5]|2[0-4][0-9]|1?[0-9]{1,2}";
-
-const HEX_16_BIT: &str = r"(\$|0x)[0-9A-Fa-f]{4}";
-const BIN_16_BIT: &str = r"(%|0b)[01]{16}";
-const OCTAL_16_BIT: &str = r"(@|0o)[0-7]{1,5}";
-const DEC_16_BIT: &str = r"6553[0-5]|655[0-2][0-9]|65[0-4][0-9]{2}|[0-5]?[0-9]{1,4}";
+use crate::constants;
 
 lazy_static! {
 
-    static ref NUM_8_BIT: String = format!("(?P<number>{}|{}|{}|{})", HEX_8_BIT, BIN_8_BIT, OCTAL_8_BIT, DEC_8_BIT);
-    static ref NUM_16_BIT: String = format!("(?P<number>{}|{}|{}|{})", HEX_16_BIT, BIN_16_BIT, OCTAL_16_BIT, DEC_16_BIT);
-
     static ref ACCUMULATOR_REGEX: Regex = Regex::new(r"^A$").unwrap();
     static ref IMPLICIT_REGEX: Regex = Regex::new(r"^$").unwrap();
-    static ref RELATIVE_REGEX: Regex = Regex::new(&format!(r"^{}$", NUM_8_BIT.as_str())).unwrap();
-    static ref IMMEDIATE_REGEX: Regex = Regex::new(&format!(r"^#{}$", NUM_8_BIT.as_str())).unwrap();
-    static ref ZERO_PAGE_REGEX: Regex = Regex::new(&format!(r"^{}$", NUM_8_BIT.as_str())).unwrap();
-    static ref ZERO_PAGE_X_REGEX: Regex = Regex::new(&format!(r"^{}\s*,\s*X$", NUM_8_BIT.as_str())).unwrap();
-    static ref ZERO_PAGE_Y_REGEX: Regex = Regex::new(&format!(r"^\${}\s*,\s*Y$", NUM_8_BIT.as_str())).unwrap();
-    static ref ABSOLUTE_REGEX: Regex = Regex::new(&format!(r"^\${}$", NUM_16_BIT.as_str())).unwrap();
-    static ref ABSOLUTE_X_REGEX: Regex = Regex::new(&format!(r"^{}\s*,\s*X$", NUM_16_BIT.as_str())).unwrap();
-    static ref ABSOLUTE_Y_REGEX: Regex = Regex::new(&format!(r"^{}\s*,\s*Y$", NUM_16_BIT.as_str())).unwrap();
-    static ref INDIRECT_REGEX: Regex = Regex::new(&format!(r"^\({}\)$", NUM_16_BIT.as_str())).unwrap();
-    static ref INDIRECT_X_REGEX: Regex = Regex::new(&format!(r"^\({}\s*,\s*X\)$", NUM_8_BIT.as_str())).unwrap();
-    static ref INDIRECT_Y_REGEX: Regex = Regex::new(&format!(r"^\({}\)\s*,\s*Y$", NUM_8_BIT.as_str())).unwrap();
+    static ref RELATIVE_REGEX: Regex = Regex::new(&format!(r"^{}$", constants::NUM_8_BIT.as_str())).unwrap();
+    static ref IMMEDIATE_REGEX: Regex = Regex::new(&format!(r"^#{}$", constants::NUM_8_BIT.as_str())).unwrap();
+    static ref ZERO_PAGE_REGEX: Regex = Regex::new(&format!(r"^{}$", constants::NUM_8_BIT.as_str())).unwrap();
+    static ref ZERO_PAGE_X_REGEX: Regex = Regex::new(&format!(r"^{}\s*,\s*X$", constants::NUM_8_BIT.as_str())).unwrap();
+    static ref ZERO_PAGE_Y_REGEX: Regex = Regex::new(&format!(r"^\${}\s*,\s*Y$", constants::NUM_8_BIT.as_str())).unwrap();
+    static ref ABSOLUTE_REGEX: Regex = Regex::new(&format!(r"^{}$", constants::NUM_16_BIT.as_str())).unwrap();
+    static ref ABSOLUTE_X_REGEX: Regex = Regex::new(&format!(r"^{}\s*,\s*X$", constants::NUM_16_BIT.as_str())).unwrap();
+    static ref ABSOLUTE_Y_REGEX: Regex = Regex::new(&format!(r"^{}\s*,\s*Y$", constants::NUM_16_BIT.as_str())).unwrap();
+    static ref INDIRECT_REGEX: Regex = Regex::new(&format!(r"^\({}\)$", constants::NUM_16_BIT.as_str())).unwrap();
+    static ref INDIRECT_X_REGEX: Regex = Regex::new(&format!(r"^\({}\s*,\s*X\)$", constants::NUM_8_BIT.as_str())).unwrap();
+    static ref INDIRECT_Y_REGEX: Regex = Regex::new(&format!(r"^\({}\)\s*,\s*Y$", constants::NUM_8_BIT.as_str())).unwrap();
 }
 
 #[derive(Debug, PartialEq)]
