@@ -1,3 +1,5 @@
+use std::fs;
+
 use super::*;
 
 #[test]
@@ -23,6 +25,22 @@ fn parse_line_mnemonic_without_data() {
     let line = "BRK";
     let mut symbol_table: HashMap<String, Command> = HashMap::new();
     let expected_command = Command::new("BRK".to_string(), SymbolType::MNEMONIC, "".to_string());
+
+    // When
+    let result = parser::parse_line(line, 0, &mut symbol_table);
+
+    // Then
+    assert_eq!(result, Ok(expected_command));
+    assert!(symbol_table.is_empty());
+}
+
+#[test]
+fn parse_line_mnemonic_without_data_and_comments() {
+
+    // Given
+    let line = "CLC      ; CLEAR CARRY BIT";
+    let mut symbol_table: HashMap<String, Command> = HashMap::new();
+    let expected_command = Command::new("CLC".to_string(), SymbolType::MNEMONIC, "".to_string());
 
     // When
     let result = parser::parse_line(line, 0, &mut symbol_table);
@@ -192,28 +210,99 @@ fn parse_line_should_fail_when_constant_is_defined_after_label() {
 }
 
 #[test]
-pub fn tmp_test() {
+fn process_line_should_not_add_any_binary_when_process_label_only() {
 
-    let mut lines: Vec<&str> = Vec::new();
-
-    lines.push("  .org $8000");
-    lines.push("       RESULT = 0x0F");
-    lines.push("START: LDA #RESULT ; Load a number");
-    lines.push("   JMP START ; Test Jump");
-    lines.push("; Here is a comment without any command on it");
-    lines.push("BRK");
-
-    let mut address: u16 = 0;
+    // Given
+    let mut address: u16 = 10;
+    let line = "LABEL:";
     let mut symbol_table: HashMap<String, Command> = HashMap::new();
-    let mut program_binary: Vec<u8> = Vec::with_capacity(500);
-    let mut line_number: usize = 1;
+    let mut program_binary: Vec<u8> = Vec::new();
+    let expected_label = Command::new("LABEL".to_string(), SymbolType::LABEL, "10".to_string());
 
-    for line in lines {
-        if let Err(parse_error) = process_line(line, &mut address, &mut program_binary, &mut symbol_table) {
-            panic!("Error in line {}: {:?}", line_number, parse_error);
-        }
-        line_number += 1;
+    // When
+    if let Err(error) = process_line(line, &mut address, &mut program_binary, &mut symbol_table) {
+        panic!("Error: {:?}", error);
     }
 
-    assert_eq!(program_binary, vec![0xA9, 0x0F, 0x4C, 0x00, 0x80, 0x00]);
+    // Then
+    assert!(program_binary.is_empty());
+    assert_eq!(symbol_table, HashMap::from([(expected_label.symbol.name.clone(), expected_label)]));
+}
+
+#[test]
+fn process_line_should_not_add_any_binary_when_process_constant() {
+
+    // Given
+    let mut address: u16 = 10;
+    let line = "RESULT = $000A";
+    let mut symbol_table: HashMap<String, Command> = HashMap::new();
+    let mut program_binary: Vec<u8> = Vec::new();
+    let expected_label = Command::new("RESULT".to_string(), SymbolType::CONSTANT, "$000A".to_string());
+
+    // When
+    if let Err(error) = process_line(line, &mut address, &mut program_binary, &mut symbol_table) {
+        panic!("Error: {:?}", error);
+    }
+
+    // Then
+    assert!(program_binary.is_empty());
+    assert_eq!(symbol_table, HashMap::from([(expected_label.symbol.name.clone(), expected_label)]));
+}
+
+#[test]
+fn process_line_address_should_be_updated_when_process_org() {
+
+    // Given
+    let mut address: u16 = 10;
+    let line = ".org $000B";
+    let mut symbol_table: HashMap<String, Command> = HashMap::new();
+    let mut program_binary: Vec<u8> = Vec::new();
+
+    // When
+    if let Err(error) = process_line(line, &mut address, &mut program_binary, &mut symbol_table) {
+        panic!("Error: {:?}", error);
+    }
+
+    // Then
+    assert!(program_binary.is_empty());
+    assert!(symbol_table.is_empty());
+    assert_eq!(0x000B, address);
+}
+
+#[test]
+fn process_line_should_append_binary_to_current_vector() {
+
+    // Given
+    let mut address: u16 = 10;
+    let line = "ADC #0x0F";
+    let mut symbol_table: HashMap<String, Command> = HashMap::new();
+    let mut program_binary: Vec<u8> = vec![42, 42, 42];
+
+    // When
+    if let Err(error) = process_line(line, &mut address, &mut program_binary, &mut symbol_table) {
+        panic!("Error: {:?}", error);
+    }
+
+    // Then
+    assert_eq!(program_binary, vec![42, 42, 42, 0x69, 0x0F]);
+    assert!(symbol_table.is_empty());
+    assert_eq!(0x000C, address);
+}
+
+#[test]
+pub fn test_assembly_sum_1_and_2_program() {
+
+    // Given
+    let root_dir = env!("CARGO_MANIFEST_DIR");
+    let expected_binary: Vec<u8> = vec![
+        0x18, 0xD8, 0xA9, 0x01, 0x8D, 0x00, 0x61, 0xA9, 0x02, 0x8D, 0x01,
+        0x61, 0xAD, 0x00, 0x61, 0x6D, 0x01, 0x61, 0x8D, 0x02, 0x61, 0x00];
+    let input_filename = format!("{}/resources/test/add.asm", root_dir);
+    let output_filename = format!("{}/target/tmp/output.bin", root_dir);
+
+    // When
+    assemble(input_filename.as_str(), Some(output_filename.as_str()));
+
+    //Then
+    assert_eq!(expected_binary, fs::read(output_filename).unwrap());
 }
