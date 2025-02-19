@@ -1,6 +1,10 @@
-mod types;
+pub mod types;
+pub mod parser;
 
-use crate::assembler::types::NumericType;
+use std::collections::HashMap;
+
+use types::{Command, SymbolType};
+
 use crate::cpu::opcode;
 use crate::cpu::types::InstructionError;
 use crate::memory::types::AddressingMode;
@@ -15,18 +19,29 @@ pub fn assemble() {
     // 7. Output assembled bytes
 }
 
-/// Parse source code line by line, saving each 'logical line' in a certain position
-/// of the vector.
-/// It aggregates labels definitions with instructions.
-/// Creates a symbol table, so labels can be resolved into addresses later
-fn parse_source_code(source_code: &str) -> Vec<&str> {
-    Vec::new()
-}
+/// Process each line of the source code
+/// Could return a ParseError
+pub fn process_line(line: &str, address: &mut u16, program_binary: &mut Vec<u8>, symbol_table: &mut HashMap<String, Command>) -> Result<(), types::ParseError> {
+    let mut command = parser::parse_line(line, *address, symbol_table)?;
+    if command.symbol.symbol_type != SymbolType::UNDEFINED {
+        // Try to replace any symbols we already capture at the first step
+        parser::replace_symbols(&mut command, &symbol_table);
 
-/// Resolve the labels used in the source code.
-/// Return
-fn resolve_labels(source: &str) -> Vec<&str> {
-    Vec::new()
+        // Parse commands
+        if command.symbol.symbol_type == SymbolType::DIRECTIVE {
+            if command.symbol.name == ".org" {
+                *address = parser::parse_org_data(command, &symbol_table)?;
+            }
+        } else if command.symbol.symbol_type == SymbolType::MNEMONIC {
+            let result = assemble_instruction(&command.symbol.name, &command.data).clone();
+            let Some(mut instruction_binary) = result.clone().ok() else {
+                return Err(types::ParseError::InstructionError(result.unwrap_err()));
+            };
+            *address += instruction_binary.len() as u16;
+            program_binary.append(&mut instruction_binary);
+        }
+    }
+    Ok(())
 }
 
 /// Assemble a single instruction. Returns a Vec<u8> containing the machine code for that instruction
@@ -40,39 +55,10 @@ pub fn assemble_instruction(mnemonic: &str, data: &str) -> Result<Vec<u8>, Instr
     let op = opcode::translate_instruction_to_opcode(mnemonic, addressing_mode)?;
 
     // Parse data associated to the instruction
-    Ok(parse_data(op, addressing_mode, data))
+    Ok(parser::parse_instruction_data(op, addressing_mode, data))
 }
 
-/// Parse the data associated with instruction (operand) and return the values associated with them
-/// in a Vec<u8>. First position of vector is the opcode already translated (op)
-fn parse_data(op: u8, addressing_mode: AddressingMode, data: &str) -> Vec<u8> {
-    
-    // Get the number capture of the regex. As the regex already matched at this point, we can
-    // safely do the unwrap.
-    let numeric_string = &addressing_mode.regex().captures(data).unwrap()["number"];
-    // Check what is the numeric type (binary, octal, decimal or hexadecimal)
-    let (numeric_type, value) = NumericType::detect_type_in_string(numeric_string);
-    
-    let mut result: Vec<u8> = Vec::with_capacity(3);
-    result.push(op);
-
-    let number = u16::from_str_radix(value, numeric_type.to_radix()).unwrap();
-
-    // If number fits one byte, then save it as 8-bit number
-    if number & 0xFF00 == 0 {
-        result.push(number as u8);
-
-    // If not, save 16-bit number separated in two parrs of 8-bit.
-    // As we use little endian, we store last byte first
-    } else {
-        
-        result.push((number & 0x00FF) as u8);
-        result.push((number >> 8) as u8);
-    }
-    result
-}
-
-/// Given the instruction data and the list of possible addressing modes for the current instruction
+// Given the instruction data and the list of possible addressing modes for the current instruction
 /// returns the desired addressing mode. It's done by applying each addressing mode associated regex
 /// and check if the data matches.
 /// Return the addressing mode which associated regex matches the data
@@ -86,3 +72,5 @@ fn define_addressing_mode(data: &str, addressing_modes: &Vec<AddressingMode>) ->
     Err(InstructionError::AddressingModeNotRecognized(data.to_string()))
 }
 
+#[cfg(test)]
+mod tests;
