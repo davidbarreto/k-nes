@@ -1,13 +1,13 @@
 use bitflags::bitflags;
 use std::fmt;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum InstructionError {
     InvalidOpcode(u8),
     InvalidInstruction(String),
     NotImplementedOpcode(u8),
     NotImplementedInstruction(String),
-    InvalidIMnemonicAndAddressingModePair(String, String),
+    InvalidMnemonicAndAddressingModePair(String, String),
     AddressingModeNotRecognized(String),
     FatalError(String)
 }
@@ -24,7 +24,7 @@ impl fmt::Display for InstructionError {
             InstructionError::NotImplementedInstruction(mnemonic) => {
                 write!(f, "Not implemented instruction: {}", mnemonic)
             },
-            InstructionError::InvalidIMnemonicAndAddressingModePair(mnemonic, addressing_mode) => {
+            InstructionError::InvalidMnemonicAndAddressingModePair(mnemonic, addressing_mode) => {
                 write!(f, "The mnemonic/addressing mode pair [{}/{}] is invalid", mnemonic, addressing_mode)
             },
             InstructionError::InvalidInstruction(ref mnemonic) => {
