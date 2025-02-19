@@ -2,25 +2,47 @@ pub mod types;
 pub mod parser;
 
 use std::collections::HashMap;
+use std::fs::File;
+use std::io::{self, BufRead, Write};
+use std::path::Path;
 
 use types::{Command, SymbolType};
 
+use crate::constants;
 use crate::cpu::opcode;
 use crate::cpu::types::InstructionError;
 use crate::memory::types::AddressingMode;
 
-pub fn assemble() {
-    // 1. Read source file into a list of lines
-    // 2. Strip comments and normalize whitespace
-    // 3. First pass: Resolve labels and calculate addresses
-    // 4. Second pass: Parse mnemonics and operands, generate machine code
-    // 5. Handle relative addresses (branch instructions)
-    // 6. Handle control structures (directives like .org, .byte, .word)
-    // 7. Output assembled bytes
+pub fn assemble(filename: &str, output_filename: Option<&str>) {
+
+    let mut line_number: usize = 1;
+    let mut address: u16 = 0;
+    let mut program_binary: Vec<u8> = Vec::with_capacity(200);
+    let mut symbol_table: HashMap<String, Command> = HashMap::with_capacity(50);
+
+    if let Ok(lines) = read_lines(filename) {
+        for line in lines.map_while(Result::ok) {
+            if let Err(parse_error) = process_line(&line, &mut address, &mut program_binary, &mut symbol_table) {
+                panic!("Error in line {}: {:?}", line_number, parse_error);
+            }
+            line_number += 1;
+        }
+    }
+
+    let output = match output_filename {
+        Some(name) => name,
+        None => constants::DEFAULT_OUTPUT_FILENAME,
+    };
+
+    if let Err(error) = write_file(output, program_binary) {
+        panic!("Error creating output binary file: {}", error);
+    };
 }
 
 /// Process each line of the source code
 /// Could return a ParseError
+/// TODO Handle relative addresses (branch instructions)
+/// TODO Handle more directives
 pub fn process_line(line: &str, address: &mut u16, program_binary: &mut Vec<u8>, symbol_table: &mut HashMap<String, Command>) -> Result<(), types::ParseError> {
     let mut command = parser::parse_line(line, *address, symbol_table)?;
     if command.symbol.symbol_type != SymbolType::UNDEFINED {
@@ -70,6 +92,19 @@ fn define_addressing_mode(data: &str, addressing_modes: &Vec<AddressingMode>) ->
         }
     }
     Err(InstructionError::AddressingModeNotRecognized(data.to_string()))
+}
+
+fn read_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>>
+where P: AsRef<Path>, {
+    let file = File::open(filename)?;
+    Ok(io::BufReader::new(file).lines())
+}
+
+fn write_file<P>(filename: P, binary_vec: Vec<u8>) -> io::Result<()>
+where P: AsRef<Path>, {
+    let mut file = File::create(filename)?;
+    file.write_all(&binary_vec)?;
+    Ok(())
 }
 
 #[cfg(test)]
