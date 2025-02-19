@@ -80,7 +80,9 @@ pub fn parse_line(line: &str, address_number: u16, symbol_table: &mut HashMap<St
             else if expected_symbol_type == SymbolType::DATA {
     
                 // Accumulate tokens
-                data_tokens.push(token);
+                if !token.is_empty() {
+                    data_tokens.push(token);
+                }
                 
             // Let's try to figure out what current symbol is.
             } else {
