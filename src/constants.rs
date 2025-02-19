@@ -1,5 +1,7 @@
 use lazy_static::lazy_static;
 
+pub const DEFAULT_OUTPUT_FILENAME: &str = "output.bin";
+
 const HEX_8_BIT: &str = r"(\$|0x)[0-9A-Fa-f]{2}";
 const BIN_8_BIT: &str = r"(%|0b)[01]{8}";
 const OCTAL_8_BIT:&str = r"(@|0o)[0-7]{1,3}";
@@ -15,3 +17,4 @@ lazy_static! {
     pub static ref NUM_16_BIT: String = format!("(?P<number>{}|{}|{}|{})", HEX_16_BIT, BIN_16_BIT, OCTAL_16_BIT, DEC_16_BIT);
     pub static ref NUM_UP_TO_16_BIT: String = format!("(?P<number>{}|{}|{}|{}|{}|{}|{}|{})", HEX_8_BIT, HEX_16_BIT, BIN_8_BIT, BIN_16_BIT, OCTAL_8_BIT, OCTAL_16_BIT, DEC_8_BIT, DEC_16_BIT);
 }
+
