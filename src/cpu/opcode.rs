@@ -48,7 +48,7 @@ lazy_static! {
 
         map.insert(("BPL", AddressingMode::Relative), BPL);
 
-        map.insert(("BRK", AddressingMode::Relative), BRK);
+        map.insert(("BRK", AddressingMode::Implicit), BRK);
 
         map.insert(("BVC", AddressingMode::Relative), BVC);
 
@@ -729,7 +729,7 @@ impl Opcode {
 pub fn translate_instruction_to_opcode(mnemonic: &str, addressing_mode: AddressingMode) -> Result<u8, InstructionError> {
     OPCODE_MAP.get(&(mnemonic, addressing_mode))
         .copied()
-        .ok_or_else(|| InstructionError::InvalidIMnemonicAndAddressingModePair(mnemonic.to_string(), addressing_mode.to_string()))
+        .ok_or_else(|| InstructionError::InvalidMnemonicAndAddressingModePair(mnemonic.to_string(), addressing_mode.to_string()))
 }
 
 pub fn is_valid_mnemonic(mnemonic: &str) -> bool {
