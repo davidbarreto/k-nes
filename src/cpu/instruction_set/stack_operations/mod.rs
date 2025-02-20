@@ -30,8 +30,8 @@ impl StackOperations for Cpu {
     }
 
     fn plp(&mut self) {
-        self.registers.status = CpuFlags::from_bits_truncate(self.memory.read(STACK_POINTER_BASE_ADDRESS + self.registers.stack_pointer as u16));
         self.registers.stack_pointer = self.registers.stack_pointer.wrapping_add(1);
+        self.registers.status = CpuFlags::from_bits_truncate(self.memory.read(STACK_POINTER_BASE_ADDRESS + self.registers.stack_pointer as u16));
     }
 }
 
