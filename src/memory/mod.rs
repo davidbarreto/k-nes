@@ -30,6 +30,7 @@ impl Memory {
         array.copy_from_slice(&self.mem[address..address + N]);
         array
     }
+    
     pub fn write(&mut self, data: u8, address: u16) {
         self.mem[address as usize] = data;
     }

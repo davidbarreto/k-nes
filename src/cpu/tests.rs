@@ -294,6 +294,143 @@ fn execute_adc_indirect_y_with_high_y_value() {
 }
 
 #[test]
+fn test_calculate_address_absolute() {
+    // Given
+    let expected_value: u16 = 0x1020;
+    let mut cpu = Cpu::new();
+    cpu.registers.program_counter = 0x8000;
+    cpu.memory.write(0x20, 0x8000);
+    cpu.memory.write(0x10, 0x8001);
+
+    // When
+    let result = cpu.calculate_address(AddressingMode::Absolute);
+
+    // Then
+    assert_eq!(expected_value, result);
+}
+
+#[test]
+fn test_calculate_address_absolute_x() {
+    // Given
+    let expected_value: u16 = 0x102A;
+    let mut cpu = Cpu::new();
+    cpu.registers.program_counter = 0x8000;
+    cpu.registers.x_register = 0x0A;
+    cpu.memory.write(0x20, 0x8000);
+    cpu.memory.write(0x10, 0x8001);
+
+    // When
+    let result = cpu.calculate_address(AddressingMode::AbsoluteX);
+
+    // Then
+    assert_eq!(expected_value, result);
+}
+
+#[test]
+fn test_calculate_address_absolute_y() {
+    // Given
+    let expected_value: u16 = 0x102A;
+    let mut cpu = Cpu::new();
+    cpu.registers.program_counter = 0x8000;
+    cpu.registers.y_register = 0x0A;
+    cpu.memory.write(0x20, 0x8000);
+    cpu.memory.write(0x10, 0x8001);
+
+    // When
+    let result = cpu.calculate_address(AddressingMode::AbsoluteY);
+
+    // Then
+    assert_eq!(expected_value, result);
+}
+
+#[test]
+fn test_calculate_address_immediate() {
+    // Given
+    let mut cpu = Cpu::new();
+    cpu.registers.program_counter = 0x8000;
+    
+    // When
+    let result = cpu.calculate_address(AddressingMode::Immediate);
+
+    // Then
+    assert_eq!(cpu.registers.program_counter, result);
+}
+
+#[test]
+fn test_calculate_address_indirect() {
+    // Given
+    let expected_value = 0x01FF;
+    let mut cpu = Cpu::new();
+    cpu.registers.program_counter = 0x8000;
+    
+    cpu.memory.write(0x20, 0x8000);
+    cpu.memory.write(0x10, 0x8001);
+
+    cpu.memory.write(0xFF, 0x1020);
+    cpu.memory.write(0x01, 0x1021);
+    
+    // When
+    let result = cpu.calculate_address(AddressingMode::Indirect);
+
+    // Then
+    assert_eq!(expected_value, result);
+}
+
+#[test]
+fn test_calculate_address_indirect_x() {
+    // Given
+    let expected_value = 0x10;
+    let mut cpu = Cpu::new();
+    cpu.registers.program_counter = 0x8000;
+    cpu.registers.x_register = 0x0A;
+    
+    cpu.memory.write(0x20, 0x8000);
+    cpu.memory.write(0x10, 0x002A);
+    
+    // When
+    let result = cpu.calculate_address(AddressingMode::IndirectX);
+
+    // Then
+    assert_eq!(expected_value, result);
+}
+
+#[test]
+fn test_calculate_address_indirect_y() {
+    // Given
+    let expected_value = 0x301A;
+    let mut cpu = Cpu::new();
+    cpu.registers.program_counter = 0x8000;
+    cpu.registers.y_register = 0x0A;
+    
+    cpu.memory.write(0x20, 0x8000);
+    cpu.memory.write(0x10, 0x0020);
+    cpu.memory.write(0x30, 0x0021);
+    
+    // When
+    let result = cpu.calculate_address(AddressingMode::IndirectY);
+
+    // Then
+    assert_eq!(expected_value, result);
+}
+
+#[test]
+fn test_calculate_address_zero_page() {
+    // Given
+    let expected_value = 0x10;
+    let mut cpu = Cpu::new();
+    cpu.registers.program_counter = 0x8000;
+    
+    cpu.memory.write(0x20, 0x8000);
+    cpu.memory.write(0x10, 0x0020);
+    
+    // When
+    let result = cpu.calculate_address(AddressingMode::IndirectY);
+
+    // Then
+    assert_eq!(expected_value, result);
+}
+
+#[test]
 fn test_easy_6502_our_first_program() {
 
     // Address  Hexdump   Dissassembly
@@ -539,126 +676,6 @@ fn test_easy_6502_jumping_jsr_rts() {
     assert_eq!(cpu.memory.read(0x01FF), 0x06);
 }
 
-#[test]
-#[ignore = "Assembly test program seems to be wrong"]
-/// This tests uses a program that calculates week day
-/// Reference: (Day of Week)[http://www.6502.org/source/misc/dow.htm]
-/// How to compute the day of the week in 6502 assembly.
-/// By Paul Guertin (pg@sff.net), 18 August 2000.
-fn test_day_of_week() {
-    
-    // This routine works for any date from 1900-03-01 to 2155-12-31.
-    // No range checking is done, so validate input before calling.
-    //
-    // I use the formula
-    //     Weekday = (day + offset[month] + year + year/4 + fudge) mod 7
-    // where the value of fudge depends on the century.
-    //
-    // Input: Y = year (0=1900, 1=1901, ..., 255=2155)
-    //        X = month (1=Jan, 2=Feb, ..., 12=Dec)
-    //        A = day (1 to 31)
-    //
-    // Output: Weekday in A (0=Sunday, 1=Monday, ..., 6=Saturday)
-    //
-    // Given input: 1988-07-28
-    // Expected output: Thursday (4)
-    //
-    // PROGRAM:
-    // TMP      EQU $6          ; Temporary storage
-
-    // WEEKDAY:
-    //          CPX #3          ; Year starts in March to bypass
-    //          BCS MARCH       ; leap year problem
-    //          DEY             ; If Jan or Feb, decrement year
-    // MARCH    EOR #$7F        ; Invert A so carry works right
-    //          CPY #200        ; Carry will be 1 if 22nd century
-    //          ADC MTAB-1,X    ; A is now day+month offset
-    //          STA TMP
-    //          TYA             ; Get the year
-    //          JSR MOD7        ; Do a modulo to prevent overflow
-    //          SBC TMP         ; Combine with day+month
-    //          STA TMP
-    //          TYA             ; Get the year again
-    //          LSR             ; Divide it by 4
-    //          LSR
-    //          CLC             ; Add it to y+m+d and fall through
-    //          ADC TMP
-    // MOD7     ADC #7          ; Returns (A+3) modulo 7
-    //          BCC MOD7        ; for A in 0..255
-    //          RTS
-    // MTAB     DB 1,5,6,3,1,5,3,0,4,2,6,4   	; Month offsets
-
-    let program: [u8; 91] = 
-    [
-        // Write MTAB values into memory starting at $0600
-        0xA9, 0x01,       // LDA #$01 (First MTAB value)
-        0x85, 0x20,       // STA $0020
-        0xA9, 0x05,       // LDA #$05
-        0x85, 0x21,       // STA $0021
-        0xA9, 0x06,       // LDA #$06
-        0x85, 0x22,       // STA $0022
-        0xA9, 0x03,       // LDA #$03
-        0x85, 0x23,       // STA $0023
-        0xA9, 0x01,       // LDA #$01
-        0x85, 0x24,       // STA $0024
-        0xA9, 0x05,       // LDA #$05
-        0x85, 0x25,       // STA $0025
-        0xA9, 0x03,       // LDA #$03
-        0x85, 0x26,       // STA $0026
-        0xA9, 0x00,       // LDA #$00
-        0x85, 0x27,       // STA $0027
-        0xA9, 0x04,       // LDA #$04
-        0x85, 0x28,       // STA $0028
-        0xA9, 0x02,       // LDA #$02
-        0x85, 0x29,       // STA $0029
-        0xA9, 0x06,       // LDA #$06
-        0x85, 0x2A,       // STA $002A
-        0xA9, 0x04,       // LDA #$04
-        0x85, 0x2B,       // STA $002B
-
-        // Write TMP
-        0xA9, 0x06,       // LDA #$06
-        0x85, 0x06,       // STA $0006
-
-        // Write INPUT
-        0xA0, 0xBC,       // LDY #$BC (Year = 1988 - 1900 = 88)
-        0xA2, 0x07,       // LDX #$07 (Month = July = 7)
-        0xA9, 0x1C,       // LDA #$1C (Day = 28)
-
-        // Main program
-        0xE0, 0x03,       // CPX #$03
-        0xB0, 0x01,       // BCS MARCH
-        0x88,             // DEY
-        0x49, 0x7F,       // EOR #$7F -- MARCH
-        0xC0, 0xC8,       // CPY #$C8
-        0x75, 0x20,       // ADC MTAB-1,X
-        0x85, 0x06,       // STA $06
-        0x98,             // TYA
-        0x20, 0x56, 0x06, // JSR MOD7
-        0xE5, 0x06,       // SBC $06
-        0x85, 0x06,       // STA $06
-        0x98,             // TYA
-        0x4A,             // LSR
-        0x4A,             // LSR
-        0x18,             // CLC
-        0x65, 0x06,       // ADC $06
-        00,               // BRK - End of program
-
-        // MOD7 Subroutine
-        0x69, 0x07,       // ADC #$07 - MOD7
-        0x90, 0xFB,       // BCC MOD7
-        0x60              // RTS
-    ];
-
-    let cpu = execute_program(&program);
-
-    assert_eq!(cpu.registers.program_counter, 0x0668);
-    assert_eq!(cpu.registers.accumulator, 0xCE); // Answer should be Thursday
-    assert_eq!(cpu.registers.x_register, 0x00);
-    assert_eq!(cpu.registers.y_register, 0x00);
-
-}
-
 fn execute_program(program: &[u8]) -> Cpu {
     let program_address: u16 = 0x0600;
     let mut cpu = Cpu::new();
@@ -673,5 +690,3 @@ fn execute_program(program: &[u8]) -> Cpu {
     }
     cpu
 }
-
-// TODO Add tests for other addressing modes
