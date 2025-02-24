@@ -17,7 +17,7 @@ fn write() {
 #[test]
 fn read_u16() {
     // Given
-    let address: u16 = 0x8000;
+    let address: u16 = 0x0200;
     let least_significant_byte: u8 = 0x69;
     let most_significant_byte: u8 = 0x96;
     let expected_data: u16 = 0x9669;
@@ -42,7 +42,5 @@ fn write_array() {
     memory.write_array(&array, address);
 
     // Then
-    for i in 0..array.len() {
-        assert_eq!(array[i], memory.read(address + i as u16));
-    }
+    assert_eq!(array, memory.read_as_array(address as usize));
 }

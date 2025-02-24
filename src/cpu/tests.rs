@@ -298,9 +298,9 @@ fn test_calculate_address_absolute() {
     // Given
     let expected_value: u16 = 0x1020;
     let mut cpu = Cpu::new();
-    cpu.registers.program_counter = 0x8000;
-    cpu.memory.write(0x20, 0x8000);
-    cpu.memory.write(0x10, 0x8001);
+    cpu.registers.program_counter = 0x0200;
+    cpu.memory.write(0x20, 0x0200);
+    cpu.memory.write(0x10, 0x0201);
 
     // When
     let result = cpu.calculate_address(AddressingMode::Absolute);
@@ -314,10 +314,10 @@ fn test_calculate_address_absolute_x() {
     // Given
     let expected_value: u16 = 0x102A;
     let mut cpu = Cpu::new();
-    cpu.registers.program_counter = 0x8000;
+    cpu.registers.program_counter = 0x0200;
     cpu.registers.x_register = 0x0A;
-    cpu.memory.write(0x20, 0x8000);
-    cpu.memory.write(0x10, 0x8001);
+    cpu.memory.write(0x20, 0x0200);
+    cpu.memory.write(0x10, 0x0201);
 
     // When
     let result = cpu.calculate_address(AddressingMode::AbsoluteX);
@@ -331,10 +331,10 @@ fn test_calculate_address_absolute_y() {
     // Given
     let expected_value: u16 = 0x102A;
     let mut cpu = Cpu::new();
-    cpu.registers.program_counter = 0x8000;
+    cpu.registers.program_counter = 0x0200;
     cpu.registers.y_register = 0x0A;
-    cpu.memory.write(0x20, 0x8000);
-    cpu.memory.write(0x10, 0x8001);
+    cpu.memory.write(0x20, 0x0200);
+    cpu.memory.write(0x10, 0x0201);
 
     // When
     let result = cpu.calculate_address(AddressingMode::AbsoluteY);
@@ -361,10 +361,10 @@ fn test_calculate_address_indirect() {
     // Given
     let expected_value = 0x01FF;
     let mut cpu = Cpu::new();
-    cpu.registers.program_counter = 0x8000;
+    cpu.registers.program_counter = 0x0200;
     
-    cpu.memory.write(0x20, 0x8000);
-    cpu.memory.write(0x10, 0x8001);
+    cpu.memory.write(0x20, 0x0200);
+    cpu.memory.write(0x10, 0x0201);
 
     cpu.memory.write(0xFF, 0x1020);
     cpu.memory.write(0x01, 0x1021);

@@ -14,7 +14,7 @@ impl Memory {
     }
 
     pub fn read(&self, address: u16) -> u8 {
-        self.mem[address as usize]
+        self.mem[self.map_address(address)]
     }
 
     /// Uses Little Endian (LE) approach to retrieve 2 bytes from memory as a value
@@ -24,20 +24,39 @@ impl Memory {
 
         msb << 8 | lsb
     }
+    
+    pub fn write(&mut self, data: u8, address: u16) {
+        self.mem[self.map_address(address)] = data;
+    }
 
+    fn map_address(&self, address: u16) -> usize {
+        match address {
+            0x0000..=0x1FFF => self.mirror_down(address, 0x0800),
+            0x2000..=0x3FFF => 0, // TODO Handle PPU registers
+            0x4000..=0x4017 => 0, // TODO Handle APU IO Registers
+            0x4020..=0xFFFF => 0, // TODO Handle ROM
+            _ => 0
+        }
+    }
+
+    fn mirror_down(&self, address: u16, size: u16) -> usize {
+        (address % size) as usize
+    }
+
+    // Following functions are used only in tests, so no need to use address mappings
+    // The idea is just to facilitate memory manipulation in tests
+
+    #[cfg(test)]
     pub fn read_as_array<const N: usize>(&self, address: usize) -> [u8; N] {
         let mut array = [0u8; N];
         array.copy_from_slice(&self.mem[address..address + N]);
         array
     }
-    
-    pub fn write(&mut self, data: u8, address: u16) {
-        self.mem[address as usize] = data;
-    }
 
+    #[cfg(test)]
     pub fn write_array(&mut self, data: &[u8], address: u16) {
         for (i, &byte) in data.iter().enumerate() {
-            self.write(byte, address + i as u16);
+            self.mem[address as usize + i] = byte;
         }
     }
 }
