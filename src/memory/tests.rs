@@ -34,7 +34,7 @@ fn read_u16() {
 #[test]
 fn write_array() {
     // Given
-    let address: u16 = 0x8000;
+    let address: u16 = 0x0700;
     let array: [u8; 5] = [0x69, 0x96, 0x12, 0x80, 0x0f];
 
     // When
@@ -43,4 +43,17 @@ fn write_array() {
 
     // Then
     assert_eq!(array, memory.read_as_array(address as usize));
+}
+
+#[test]
+fn map_address() {
+    // Given
+    let address: u16 = 0x0801;
+    let expected_mapped_address: u16 = 0x0001;
+
+    // When
+    let mapped_address = Memory::new().map_address(address);
+
+    // Then
+    assert_eq!(expected_mapped_address, mapped_address as u16);
 }

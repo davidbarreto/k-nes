@@ -1,6 +1,6 @@
 pub mod types;
 
-const MEMORY_SIZE: usize = 0x10000;
+const MEMORY_SIZE: usize = 0x0800;
 
 pub struct Memory {
     mem: [u8; MEMORY_SIZE],
